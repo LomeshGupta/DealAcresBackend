@@ -66,11 +66,11 @@ const addService = asyncHandler(async (req, res) => {
 const updateService = asyncHandler(async (req, res) => {
   const service = await Service.findById(req.body._id);
 
-  if (user) {
-    const { name, description, path } = user;
-    user.name = req.body.name || name;
-    user.description = req.body.description || description;
-    user.path = req.body.path || path;
+  if (service) {
+    const { name, description, path } = service;
+    service.name = req.body.name || name;
+    service.description = req.body.description || description;
+    service.path = req.body.path || path;
 
     const updatedService = await service.save();
     res.status(200).json({
