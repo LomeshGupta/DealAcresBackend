@@ -82,6 +82,7 @@ const uploadPropertyData = async (req, res) => {
     await Property.insertMany(data);
     res.send("File uploaded and data stored in database successfully!");
   } catch (error) {
+    console.error("Error:", error);
     res.status(500).send("Error saving data to database");
   }
 };
