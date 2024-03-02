@@ -11,7 +11,11 @@ const propertySchema = new mongoose.Schema({
   address: { type: String },
   zipPostalCode: { type: String },
   typeOfProperty: { type: String },
-  status: { type: String },
+  Status: {
+    type: String,
+    enum: ["Open", "Close"],
+    default: "Open",
+  },
   feature: { type: String },
   label: { type: String },
   country: { type: String },

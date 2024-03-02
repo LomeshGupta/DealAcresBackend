@@ -1,11 +1,12 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const propertyController = require('../controller/propertyController');
+const propertyController = require("../controller/propertyController");
 
-router.post('/create', propertyController.createProperty);
-router.get('/getall', propertyController.getAllProperties);
-router.get('/:id', propertyController.getPropertyById);
-router.put('/:id', propertyController.updatePropertyById);
-router.delete('/:id', propertyController.deletePropertyById);
+router.post("/create", propertyController.createProperty);
+router.get("/getall", propertyController.getAllProperties);
+router.get("/:id", propertyController.getPropertyById);
+router.put("/:id", propertyController.updatePropertyById);
+router.delete("/:id", propertyController.deletePropertyById);
+router.post("/uploadexcel", propertyController.uploadPropertyData);
 
 module.exports = router;
