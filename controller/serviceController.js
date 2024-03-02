@@ -33,7 +33,7 @@ const addService = asyncHandler(async (req, res) => {
   res.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  const { name, description, path } = req.body;
+  const { name, description, path, image_url } = req.body;
 
   //validations
   if (!name || !description || !path) {
@@ -47,6 +47,7 @@ const addService = asyncHandler(async (req, res) => {
     name,
     description,
     path,
+    image_url
   });
 
   if (service) {
@@ -55,6 +56,7 @@ const addService = asyncHandler(async (req, res) => {
       _id,
       name,
       path,
+      image_url
     });
   } else {
     res.status(400);
@@ -67,10 +69,11 @@ const updateService = asyncHandler(async (req, res) => {
   const service = await Service.findById(req.body._id);
 
   if (service) {
-    const { name, description, path } = service;
+    const { name, description, path, image_url } = service;
     service.name = req.body.name || name;
     service.description = req.body.description || description;
     service.path = req.body.path || path;
+    service.image_url = req.body || image_url;
 
     const updatedService = await service.save();
     res.status(200).json({
@@ -78,6 +81,7 @@ const updateService = asyncHandler(async (req, res) => {
       name: updatedService.name,
       description: updatedService.description,
       path: updatedService.path,
+      image_url: updateService.image_url
     });
   } else {
     res.status(404);

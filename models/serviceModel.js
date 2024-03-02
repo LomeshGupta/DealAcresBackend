@@ -16,6 +16,10 @@ var serviceDetail = new serviceSchema(
       type: String,
       require: [true, "Please add your email id"],
     },
+    image_url: {
+      type: String,
+      require: [true, "Please add your image url"],
+    },
   },
   {
     timestamps: true,
