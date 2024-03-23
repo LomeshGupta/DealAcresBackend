@@ -25,18 +25,10 @@ const propertySchema = new mongoose.Schema({
   featureImage: { type: String },
   content: { type: String },
   floorPlanImages: {
-    type: [
-      {
-        type: String,
-      },
-    ],
+    type: [{}],
   },
   otherImages: {
-    type: [
-      {
-        type: String,
-      },
-    ],
+    type: [{}],
   },
 });
 

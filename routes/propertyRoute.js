@@ -4,8 +4,14 @@ const propertyController = require("../controller/propertyController");
 const multer = require("multer");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+// const { upload } = require("../utils/fileUpload");
 
-router.post("/", propertyController.createProperty);
+router.post(
+  "/",
+  upload.array("floorplanimage"),
+  upload.array("otherimage"),
+  propertyController.createProperty
+);
 router.get("/", propertyController.getAllProperties);
 router.get("/:id", propertyController.getPropertyById);
 router.put("/:id", propertyController.updatePropertyById);

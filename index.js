@@ -7,6 +7,8 @@ const errorHandler = require("./Middleware/errorMiddleware");
 const cookieParser = require("cookie-parser");
 const serviceRoute = require("./routes/servicesRoute");
 const propertyRoutes = require("./routes/propertyRoute");
+const testimonialsRoute = require("./routes/testimonialsRoute");
+const blogRoute = require("./routes/blogRoutes");
 
 const app = express();
 
@@ -26,6 +28,8 @@ app.use(cors());
 //routesmiddleware
 app.use("/api/services", serviceRoute);
 app.use("/api/property", propertyRoutes);
+app.use("/api/testimonials",testimonialsRoute);
+app.use("/api/blogs",blogRoute);
 
 app.get("/", (req, res) => {
   res.send("Home");

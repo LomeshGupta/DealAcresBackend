@@ -1,10 +1,14 @@
 const Property = require("../models/propertyModel");
 const multer = require("multer");
 const xlsx = require("xlsx");
+const { fileSizeFormatter } = require("../utils/fileUpload");
+const cloudinary = require("cloudinary").v2;
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
-
+cloudinary.config({
+  cloud_name: "dmen2qi7t",
+  api_key: "426686656792964",
+  api_secret: "xTxrl7ezipvf-fuWZ-Gm33wDvL0",
+});
 // Create a new property
 const createProperty = async (req, res) => {
   try {
