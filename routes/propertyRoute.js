@@ -1,15 +1,14 @@
 const express = require("express");
-const router = express.Router();
 const propertyController = require("../controller/propertyController");
 const multer = require("multer");
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
-// const { upload } = require("../utils/fileUpload");
+const uploads = multer({ storage: storage });
+const router = express.Router();
+const { upload } = require("../utils/fileUpload");
 
 router.post(
   "/",
-  upload.array("floorplanimage"),
-  upload.array("otherimage"),
+  upload.fields([{ name: "floorPlanImages" }, { name: "otherImages" }]),
   propertyController.createProperty
 );
 router.get("/", propertyController.getAllProperties);
@@ -18,7 +17,7 @@ router.put("/:id", propertyController.updatePropertyById);
 router.delete("/:id", propertyController.deletePropertyById);
 router.post(
   "/uploadexcel",
-  upload.single("excelFile"),
+  uploads.single("excelFile"),
   propertyController.uploadPropertyData
 );
 

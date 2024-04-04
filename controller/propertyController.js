@@ -12,9 +12,104 @@ cloudinary.config({
 // Create a new property
 const createProperty = async (req, res) => {
   try {
-    const newProperty = await Property.create(req.body);
+    // Check if files are present in the request
+    if (
+      !req.files ||
+      !req.files["floorPlanImages"] ||
+      !req.files["otherImages"]
+    ) {
+      res.status(400).json({ error: "No files uploaded" });
+      return;
+    }
+
+    // Extract fields from req.body
+    const {
+      title,
+      permalink,
+      price,
+      areaSize,
+      sizePostfix,
+      landArea,
+      landAreaSizePostfix,
+      address,
+      zipPostalCode,
+      typeOfProperty,
+      status,
+      feature,
+      label,
+      country,
+      state,
+      city,
+      area,
+      featureImage,
+      content,
+    } = req.body;
+
+    // Upload floor plan images to Cloudinary
+    const floorPlanImages = await Promise.all(
+      req.files["floorPlanImages"].map(async (file) => {
+        const uploadedFile = await cloudinary.uploader.upload(file.path, {
+          folder: "property_dealacres",
+          public_id: `${Date.now()}-${file.originalname}`,
+          resource_type: "image",
+        });
+        return {
+          fileName: file.originalname,
+          filePath: uploadedFile.secure_url,
+          fileId: `${Date.now()}-${file.originalname}`,
+          fileType: file.mimetype,
+          fileSize: fileSizeFormatter(file.size, 2),
+        };
+      })
+    );
+
+    // Upload other images to Cloudinary
+    const otherImages = await Promise.all(
+      req.files["otherImages"].map(async (file) => {
+        const uploadedFile = await cloudinary.uploader.upload(file.path, {
+          folder: "property_dealacres",
+          public_id: `${Date.now()}-${file.originalname}`,
+          resource_type: "image",
+        });
+        return {
+          fileName: file.originalname,
+          filePath: uploadedFile.secure_url,
+          fileId: `${Date.now()}-${file.originalname}`,
+          fileType: file.mimetype,
+          fileSize: fileSizeFormatter(file.size, 2),
+        };
+      })
+    );
+
+    // Create new property
+    const newProperty = await Property.create({
+      // Include all fields
+      title,
+      permalink,
+      price,
+      areaSize,
+      sizePostfix,
+      landArea,
+      landAreaSizePostfix,
+      address,
+      zipPostalCode,
+      typeOfProperty,
+      status,
+      feature,
+      label,
+      country,
+      state,
+      city,
+      area,
+      featureImage,
+      content,
+      floorPlanImages,
+      otherImages,
+    });
+
     res.status(201).json(newProperty);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Error creating property" });
   }
 };
