@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const testimonialController = require('../controller/testimonialController');
+const authMiddleware = require('../Middleware/authMiddleware');
+
+router.use(authMiddleware);
 
 // Route to create a new testimonial
 router.post('/', testimonialController.createTestimonial);

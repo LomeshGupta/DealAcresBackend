@@ -9,6 +9,8 @@ const serviceRoute = require("./routes/servicesRoute");
 const propertyRoutes = require("./routes/propertyRoute");
 const testimonialsRoute = require("./routes/testimonialsRoute");
 const blogRoute = require("./routes/blogRoutes");
+const authRoute = require("./routes/authRoute");
+const userRoute = require("./routes/userRoute");
 
 const app = express();
 
@@ -28,8 +30,10 @@ app.use(cors());
 //routesmiddleware
 app.use("/api/services", serviceRoute);
 app.use("/api/property", propertyRoutes);
-app.use("/api/testimonials",testimonialsRoute);
-app.use("/api/blogs",blogRoute);
+app.use("/api/testimonials", testimonialsRoute);
+app.use("/api/blogs", blogRoute);
+app.use("/api/auth", authRoute);
+app.use("/api/user", userRoute);
 
 app.get("/", (req, res) => {
   res.send("Home");

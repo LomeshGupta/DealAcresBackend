@@ -6,6 +6,10 @@ const uploads = multer({ storage: storage });
 const router = express.Router();
 const { upload } = require("../utils/fileUpload");
 
+const authMiddleware = require('../Middleware/authMiddleware');
+
+router.use(authMiddleware);
+
 router.post(
   "/",
   upload.fields([{ name: "floorPlanImages" }, { name: "otherImages" }]),

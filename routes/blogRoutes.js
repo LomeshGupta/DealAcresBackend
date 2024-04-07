@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const blogController = require('../controller/blogController');
+const authMiddleware = require('../Middleware/authMiddleware');
+
+router.use(authMiddleware);
 
 // Create a new blog post
 router.post('/', blogController.createBlogPost);
