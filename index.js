@@ -11,6 +11,9 @@ const testimonialsRoute = require("./routes/testimonialsRoute");
 const blogRoute = require("./routes/blogRoutes");
 const authRoute = require("./routes/authRoute");
 const userRoute = require("./routes/userRoute");
+const localityRoute = require("./routes/localityRoutes");
+const FAQRoute = require("./routes/FaqRoutes");
+const ReviewRoute = require("./routes/ReviewRoutes");
 
 const app = express();
 
@@ -34,6 +37,9 @@ app.use("/api/testimonials", testimonialsRoute);
 app.use("/api/blogs", blogRoute);
 app.use("/api/auth", authRoute);
 app.use("/api/user", userRoute);
+app.use("/api/locality", localityRoute);
+app.use("/api/localityfaq", FAQRoute);
+app.use("/api/localityreview", ReviewRoute);
 
 app.get("/", (req, res) => {
   res.send("Home");
