@@ -13,7 +13,7 @@ const authRoute = require("./routes/authRoute");
 const userRoute = require("./routes/userRoute");
 const localityRoute = require("./routes/localityRoutes");
 const FAQRoute = require("./routes/FaqRoutes");
-const ReviewRoute = require("./routes/ReviewRoutes");
+const ReviewRoute = require("./routes/reviewRoute");
 
 const app = express();
 
