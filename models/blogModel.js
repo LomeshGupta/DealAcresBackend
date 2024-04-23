@@ -2,11 +2,6 @@ const mongoose = require("mongoose");
 
 // Define the blog post schema
 const blogSchema = new mongoose.Schema({
-  id: {
-    type: mongoose.Schema.Types.ObjectId, 
-    auto: true,
-    required: true,
-  },
   title: {
     type: String,
     required: true,
@@ -19,7 +14,7 @@ const blogSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  image: String,
+  image: { type: [{}] },
   createdAt: {
     type: Date,
     default: Date.now,
