@@ -1,10 +1,35 @@
 const Blog = require("../models/blogModel");
+const { fileSizeFormatter } = require("../utils/fileUpload");
+const cloudinary = require("cloudinary").v2;
+
+cloudinary.config({
+  cloud_name: "dmen2qi7t",
+  api_key: "426686656792964",
+  api_secret: "xTxrl7ezipvf-fuWZ-Gm33wDvL0",
+});
 
 // Controller function to create a new blog post
 exports.createBlogPost = async (req, res) => {
+  let fileData = [];
   try {
-    const { title, content, author, image } = req.body;
-    const newBlogPost = new Blog({ title, content, author, image });
+    const { title, content, author } = req.body;
+
+    for (const file of req.files) {
+      const uploadedFile = await cloudinary.uploader.upload(file.path, {
+        folder: "blogs_dealacres",
+        public_id: `${Date.now()}-${file.originalname}`,
+        resource_type: "image",
+      });
+      fileData.push({
+        fileName: file.originalname,
+        filePath: uploadedFile.secure_url,
+        fileId: `${Date.now()}-${file.originalname}`,
+        fileType: file.mimetype,
+        fileSize: fileSizeFormatter(file.size, 2),
+      });
+    }
+
+    const newBlogPost = new Blog({ title, content, author, image: fileData });
     const savedBlogPost = await newBlogPost.save();
     res.status(201).json(savedBlogPost);
   } catch (error) {
@@ -69,7 +94,6 @@ exports.getAllBlogPosts = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 // Controller function to get a single blog post by ID
 exports.getBlogPostById = async (req, res) => {
