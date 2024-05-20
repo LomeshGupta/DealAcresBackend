@@ -1,12 +1,43 @@
 // Import the User model
 const bcrypt = require("bcryptjs");
 const User = require("../models/userModel");
+const { fileSizeFormatter } = require("../utils/fileUpload");
+const cloudinary = require("cloudinary").v2;
+
+cloudinary.config({
+  cloud_name: "dmen2qi7t",
+  api_key: "426686656792964",
+  api_secret: "xTxrl7ezipvf-fuWZ-Gm33wDvL0",
+});
 
 // Controller functions for user operations
 const userController = {
   // Create a new user
   createUser: async (req, res) => {
+    let fileData = [];
     try {
+      for (const file of req.files) {
+        try {
+          const uploadedFile = await cloudinary.uploader.upload(file.path, {
+            folder: "blogs_dealacres",
+            public_id: `${Date.now()}-${file.originalname}`,
+            resource_type: "auto",
+          });
+          fileData.push({
+            fileName: file.originalname,
+            filePath: uploadedFile.secure_url,
+            fileId: uploadedFile.public_id,
+            fileType: file.mimetype,
+            fileSize: fileSizeFormatter(file.size, 2),
+          });
+        } catch (uploadError) {
+          // Handle Cloudinary upload error
+          console.error("Cloudinary upload error:", uploadError);
+          return res
+            .status(500)
+            .json({ message: "Error uploading file to Cloudinary." });
+        }
+      }
       // Hash the password
       const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
@@ -23,6 +54,10 @@ const userController = {
         state: req.body.state,
         zipCode: req.body.zipCode,
         role: req.body.role,
+        agency: req.body.agency,
+        licenseNumber: req.body.licenseNumber,
+        properties: req.body.properties,
+        image: fileData,
       });
 
       await newUser.save();

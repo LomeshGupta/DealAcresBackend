@@ -43,6 +43,9 @@ const createProperty = async (req, res) => {
       area,
       featureImage,
       content,
+      amenities,
+      specifications,
+      coordinates,
     } = req.body;
 
     // Upload floor plan images to Cloudinary
@@ -105,6 +108,9 @@ const createProperty = async (req, res) => {
       content,
       floorPlanImages,
       otherImages,
+      amenities,
+      specifications,
+      coordinates,
     });
 
     res.status(201).json(newProperty);

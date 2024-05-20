@@ -14,6 +14,9 @@ const userRoute = require("./routes/userRoute");
 const localityRoute = require("./routes/localityRoutes");
 const FAQRoute = require("./routes/FaqRoutes");
 const ReviewRoute = require("./routes/reviewRoute");
+const AgentQuestion = require("./routes/AgentQuestionsRoute");
+const ProjectRoute = require("./routes/ProjectRoute");
+const LocationRoute = require("./routes/LocationRoute");
 
 const app = express();
 
@@ -35,6 +38,9 @@ app.use("/api/user", userRoute);
 app.use("/api/locality", localityRoute);
 app.use("/api/localityfaq", FAQRoute);
 app.use("/api/localityreview", ReviewRoute);
+app.use("/api/agent", AgentQuestion);
+app.use("/api/project", ProjectRoute);
+app.use("/api/location", LocationRoute);
 
 app.get("/", (req, res) => {
   res.send("Home");

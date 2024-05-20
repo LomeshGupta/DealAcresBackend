@@ -30,7 +30,15 @@ const propertySchema = new mongoose.Schema({
   otherImages: {
     type: [{}],
   },
+  amenities: [{}],
+  specifications: [{}],
+  coordinates: {
+    type: { type: String, enum: ["Point"], default: "Point" },
+    coordinates: { type: [Number], required: true },
+  },
 });
+
+propertySchema.index({ coordinates: "2dsphere" });
 
 const Property = mongoose.model("Property", propertySchema);
 

@@ -15,25 +15,32 @@ exports.createBlogPost = async (req, res) => {
     const { title, content, author } = req.body;
 
     for (const file of req.files) {
-      const uploadedFile = await cloudinary.uploader.upload(file.path, {
-        folder: "blogs_dealacres",
-        public_id: `${Date.now()}-${file.originalname}`,
-        resource_type: "image",
-      });
-      fileData.push({
-        fileName: file.originalname,
-        filePath: uploadedFile.secure_url,
-        fileId: `${Date.now()}-${file.originalname}`,
-        fileType: file.mimetype,
-        fileSize: fileSizeFormatter(file.size, 2),
-      });
+      try {
+        const uploadedFile = await cloudinary.uploader.upload(file.path, {
+          folder: "blogs_dealacres",
+          public_id: `${Date.now()}-${file.originalname}`,
+          resource_type: "auto",
+        });
+        fileData.push({
+          fileName: file.originalname,
+          filePath: uploadedFile.secure_url,
+          fileId: uploadedFile.public_id,
+          fileType: file.mimetype,
+          fileSize: fileSizeFormatter(file.size, 2),
+        });
+      } catch (uploadError) {
+        // Handle Cloudinary upload error
+        console.error("Cloudinary upload error:", uploadError);
+        return res.status(500).json({ message: "Error uploading file to Cloudinary." });
+      }
     }
 
     const newBlogPost = new Blog({ title, content, author, image: fileData });
     const savedBlogPost = await newBlogPost.save();
     res.status(201).json(savedBlogPost);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error("Internal server error:", error);
+    res.status(500).json({ message: "Internal server error." });
   }
 };
 

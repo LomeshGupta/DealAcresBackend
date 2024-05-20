@@ -25,6 +25,7 @@ const localitySchema = new mongoose.Schema({
         name: String,
         type: String
     }],
+    image: { type: [{}] }
 });
 
 // Create a model using the schema

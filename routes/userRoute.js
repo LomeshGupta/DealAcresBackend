@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controller/userController');
 const authMiddleware = require('../Middleware/adminMiddleware');
+const { upload } = require("../utils/fileUpload");
 
 // Create a new user (registration)
-router.post('/', userController.createUser);
+router.post('/', upload.array("image"), userController.createUser);
 
 // Get all users (admin only)
 router.get('/', authMiddleware, userController.getAllUsers);

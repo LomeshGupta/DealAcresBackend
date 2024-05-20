@@ -2,11 +2,12 @@ const express = require("express");
 const router = express.Router();
 const localityController = require("../controller/localityController");
 const authMiddleware = require("../Middleware/authMiddleware");
+const { upload } = require("../utils/fileUpload");
 
 router.use(authMiddleware);
 
 // Create a new locality
-router.post("/", localityController.createLocality);
+router.post("/", upload.array("image"), localityController.createLocality);
 
 // Get all localities
 router.get("/", localityController.getAllLocalities);
