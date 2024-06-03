@@ -26,6 +26,19 @@ const userSchema = new Schema({
   ],
   projects: [{ type: mongoose.Schema.Types.ObjectId, ref: "Project" }],
   image: { type: [{}] },
+
+  likes: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
+  ratings: [
+    {
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      rating: { type: Number, min: 1, max: 5 },
+    },
+  ],
 });
 
 const User = mongoose.model("User", userSchema);

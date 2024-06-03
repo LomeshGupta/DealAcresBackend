@@ -122,6 +122,63 @@ const userController = {
       res.status(500).json({ message: error.message });
     }
   },
+  // Controller for handling user likes
+  likeUser: async (req, res, next) => {
+    const { userId } = req.params; // Assuming userId is passed in the request parameters
+    const { likerId } = req.body; // Assuming likerId (the user who liked) is passed in the request body
+
+    try {
+      const user = await User.findById(userId);
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      if (user.likes.includes(likerId)) {
+        return res.status(400).json({ message: "User already liked" });
+      }
+
+      user.likes.push(likerId);
+      await user.save();
+
+      return res.status(200).json({ message: "User liked successfully" });
+    } catch (err) {
+      return res
+        .status(500)
+        .json({ message: "Internal server error", error: err });
+    }
+  },
+
+  // Controller for handling user ratings
+  rateUser: async (req, res, next) => {
+    const { userId } = req.params; // Assuming userId is passed in the request parameters
+    const { raterId, rating } = req.body; // Assuming raterId (the user who rated) and rating are passed in the request body
+
+    try {
+      const user = await User.findById(userId);
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const existingRating = user.ratings.find(
+        (r) => r.user.toString() === raterId
+      );
+
+      if (existingRating) {
+        return res.status(400).json({ message: "User already rated" });
+      }
+
+      user.ratings.push({ user: raterId, rating });
+      await user.save();
+
+      return res.status(200).json({ message: "User rated successfully" });
+    } catch (err) {
+      return res
+        .status(500)
+        .json({ message: "Internal server error", error: err });
+    }
+  },
 };
 
 module.exports = userController;
