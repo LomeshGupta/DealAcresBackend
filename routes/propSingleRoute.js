@@ -21,6 +21,6 @@ router.put('/:id', propSingleController.updateProject);
 router.delete('/:id', propSingleController.deleteProject);
 
 // Upload Excel file
-router.post('/upload', upload.single('file'), propSingleController.uploadExcel);
+router.post('/upload', uploads.single('file'), propSingleController.uploadExcel);
 
 module.exports = router;
