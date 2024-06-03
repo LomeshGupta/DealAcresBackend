@@ -12,7 +12,7 @@ cloudinary.config({
 exports.createBlogPost = async (req, res) => {
   let fileData = [];
   try {
-    const { title, content, author } = req.body;
+    const { title, content, author, tags, dateOfBlogPosted, featuredBlog } = req.body;
 
     for (const file of req.files) {
       try {
@@ -35,7 +35,15 @@ exports.createBlogPost = async (req, res) => {
       }
     }
 
-    const newBlogPost = new Blog({ title, content, author, image: fileData });
+    const newBlogPost = new Blog({ 
+      title, 
+      content, 
+      author, 
+      tags, 
+      dateOfBlogPosted, 
+      featuredBlog, 
+      image: fileData 
+    });
     const savedBlogPost = await newBlogPost.save();
     res.status(201).json(savedBlogPost);
   } catch (error) {
@@ -121,20 +129,32 @@ exports.getBlogPostById = async (req, res) => {
 // Controller function to update a blog post by ID
 exports.updateBlogPostById = async (req, res) => {
   try {
-    const { title, content, image } = req.body;
+    const { title, content, author, tags, dateOfBlogPosted, featuredBlog, image } = req.body;
+    
+    // Check if the ID parameter is valid
+    if (!req.params.id) {
+      return res.status(400).json({ message: "Invalid blog post ID" });
+    }
+
+    // Find the blog post by ID and update it
     const updatedBlogPost = await Blog.findByIdAndUpdate(
       req.params.id,
-      { title, content, image },
+      { title, content, author, tags, dateOfBlogPosted, featuredBlog, image },
       { new: true }
     );
+
+    // Check if the blog post was found and updated
     if (!updatedBlogPost) {
       return res.status(404).json({ message: "Blog post not found" });
     }
+
+    // Return the updated blog post
     res.status(200).json(updatedBlogPost);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
+
 
 // Controller function to delete a blog post by ID
 exports.deleteBlogPostById = async (req, res) => {

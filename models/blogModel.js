@@ -14,7 +14,7 @@ const blogSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  image: { type: [{}] },
+  image: [{ type: String }],
   createdAt: {
     type: Date,
     default: Date.now,
@@ -22,6 +22,16 @@ const blogSchema = new mongoose.Schema({
   updatedAt: {
     type: Date,
     default: Date.now,
+  },
+  tags: [{
+    type: String,
+  }],
+  dateOfBlogPosted: {
+    type: Date,
+  },
+  featuredBlog: {
+    type: String,
+    enum: ['popular post', 'latest post', 'relevant articles'],
   },
 });
 
