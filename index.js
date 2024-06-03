@@ -17,6 +17,7 @@ const ReviewRoute = require("./routes/reviewRoute");
 const AgentQuestion = require("./routes/AgentQuestionsRoute");
 const ProjectRoute = require("./routes/ProjectRoute");
 const LocationRoute = require("./routes/LocationRoute");
+const PropSingle = require("./routes/propSingleRoute");
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use("/api/localityreview", ReviewRoute);
 app.use("/api/agent", AgentQuestion);
 app.use("/api/project", ProjectRoute);
 app.use("/api/location", LocationRoute);
+app.use("/api/propsingle", PropSingle);
 
 app.get("/", (req, res) => {
   res.send("Home");
