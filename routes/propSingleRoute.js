@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const propSingleController = require('../controller/PropSingleController');
-const upload = require('../middlewares/upload');
+const multer = require("multer");
+const storage = multer.memoryStorage();
+const uploads = multer({ storage: storage });
 
 // Create a new project
 router.post('/', propSingleController.createProject);
