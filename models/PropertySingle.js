@@ -2,28 +2,28 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const propSingleSchema = new Schema({
-    images: { type: [String], required: true },
-    floorPlan: { type: String, required: true },
-    status: { type: String, required: true },
-    title: { type: String, required: true },
+    images: { type: [String] },
+    floorPlan: { type: String },
+    status: { type: String },
+    title: { type: String },
     location: { 
-        locality: { type: String, required: true },
-        city: { type: String, required: true }
+        locality: { type: String },
+        city: { type: String }
     },
-    price: { type: Number, required: true },
-    aboutProject: { type: String, required: true },
-    projectArea: { type: String, required: true },
-    sizes: { type: String, required: true },
-    projectSize: { type: String, required: true },
-    launchDate: { type: Date, required: true },
-    avgPrice: { type: Number, required: true },
-    possessionStatus: { type: String, required: true },
-    configuration: { type: String, required: true },
-    address: { type: String, required: true },
-    specification: { type: String, required: true },
-    amenities: { type: String, required: true },
-    aboutDeveloper: { type: String, required: true },
-    localityOverview: { type: String, required: true }
+    price: { type: Number },
+    aboutProject: { type: String },
+    projectArea: { type: String },
+    sizes: { type: String },
+    projectSize: { type: String },
+    launchDate: { type: Date },
+    avgPrice: { type: Number },
+    possessionStatus: { type: String },
+    configuration: { type: String },
+    address: { type: String },
+    specification: { type: String },
+    amenities: { type: String },
+    aboutDeveloper: { type: String },
+    localityOverview: { type: String }
 });
 
-module.exports = mongoose.model('propSingle', propSingleSchema);    
+module.exports = mongoose.model('propSingle', propSingleSchema);
