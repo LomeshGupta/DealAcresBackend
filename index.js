@@ -18,6 +18,7 @@ const AgentQuestion = require("./routes/AgentQuestionsRoute");
 const ProjectRoute = require("./routes/ProjectRoute");
 const LocationRoute = require("./routes/LocationRoute");
 const PropSingle = require("./routes/propSingleRoute");
+const Guide = require("./routes/guideRoutes");
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.use("/api/agent", AgentQuestion);
 app.use("/api/project", ProjectRoute);
 app.use("/api/location", LocationRoute);
 app.use("/api/propsingle", PropSingle);
+app.use("/api/guide", PropSingle);
 
 app.get("/", (req, res) => {
   res.send("Home");

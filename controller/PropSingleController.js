@@ -1,5 +1,6 @@
 const PropSingle = require('../models/PropertySingle');
 const xlsx = require('xlsx');
+const moment = require('moment');
 
 exports.uploadExcel = async (req, res) => {
     try {
@@ -27,7 +28,7 @@ exports.uploadExcel = async (req, res) => {
             projectArea: item.projectArea,
             sizes: item.sizes,
             projectSize: item.projectSize,
-            launchDate: new Date(item.launchDate),
+            launchDate: item.launchDate,
             avgPrice: item.avgPrice,
             possessionStatus: item.possessionStatus,
             configuration: item.configuration,
