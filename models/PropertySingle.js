@@ -26,4 +26,4 @@ const propSingleSchema = new Schema({
     localityOverview: { type: String, required: true }
 });
 
-module.exports = mongoose.model('propSingle', propSingleSchema);
+module.exports = mongoose.model('propSingle', propSingleSchema);    

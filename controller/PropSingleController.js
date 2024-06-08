@@ -8,7 +8,8 @@ exports.uploadExcel = async (req, res) => {
             return res.status(400).json({ message: 'Please upload an Excel file' });
         }
 
-        const workbook = xlsx.readFile(file.path);
+        // Read the Excel file from the buffer
+        const workbook = xlsx.read(file.buffer, { type: 'buffer' });
         const sheet_name_list = workbook.SheetNames;
         const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
 
@@ -44,6 +45,7 @@ exports.uploadExcel = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
 
 // Create a new project
 exports.createProject = async (req, res) => {
