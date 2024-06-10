@@ -3,7 +3,6 @@ const cloudinary = require('cloudinary').v2;
 const { fileSizeFormatter } = require("../utils/fileUpload");
 const xlsx = require('xlsx');
 const fs = require('fs');
-const xlsx = require('xlsx');
 
 cloudinary.config({
   cloud_name: "dmen2qi7t",

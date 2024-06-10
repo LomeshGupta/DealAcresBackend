@@ -23,7 +23,7 @@ const Guide = require("./routes/guideRoutes");
 
 const app = express();
 
-const PORT = process.env.PORT || 5002;
+const PORT = process.env.PORT || 5000;
 
 // Middleware setup
 app.use(bodyParser.json());
