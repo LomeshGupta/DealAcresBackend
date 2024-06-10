@@ -12,7 +12,7 @@ cloudinary.config({
 exports.createBlogPost = async (req, res) => {
   let fileData = [];
   try {
-    const { title, content, author, tags, dateOfBlogPosted, featuredBlog } = req.body;
+    const { title, content, author, tags, dateOfBlogPosted, featuredBlog, relevantarticle } = req.body;
 
     for (const file of req.files) {
       try {
@@ -42,7 +42,8 @@ exports.createBlogPost = async (req, res) => {
       tags, 
       dateOfBlogPosted, 
       featuredBlog, 
-      image: fileData 
+      image: fileData,
+      relevantarticle
     });
     const savedBlogPost = await newBlogPost.save();
     res.status(201).json(savedBlogPost);
@@ -129,7 +130,7 @@ exports.getBlogPostById = async (req, res) => {
 // Controller function to update a blog post by ID
 exports.updateBlogPostById = async (req, res) => {
   try {
-    const { title, content, author, tags, dateOfBlogPosted, featuredBlog, image } = req.body;
+    const { title, content, author, tags, dateOfBlogPosted, featuredBlog, image, relevantarticle } = req.body;
     
     // Check if the ID parameter is valid
     if (!req.params.id) {
@@ -139,7 +140,7 @@ exports.updateBlogPostById = async (req, res) => {
     // Find the blog post by ID and update it
     const updatedBlogPost = await Blog.findByIdAndUpdate(
       req.params.id,
-      { title, content, author, tags, dateOfBlogPosted, featuredBlog, image },
+      { title, content, author, tags, dateOfBlogPosted, featuredBlog, image, relevantarticle },
       { new: true }
     );
 

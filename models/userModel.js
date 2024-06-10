@@ -39,6 +39,9 @@ const userSchema = new Schema({
       rating: { type: Number, min: 1, max: 5 },
     },
   ],
+  tags: {
+    type: String
+  },
 });
 
 const User = mongoose.model("User", userSchema);

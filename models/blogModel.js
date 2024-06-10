@@ -23,15 +23,21 @@ const blogSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  tags: [{
-    type: String,
-  }],
+  tags: [
+    {
+      type: String,
+    },
+  ],
   dateOfBlogPosted: {
     type: Date,
   },
   featuredBlog: {
     type: String,
-    enum: ['popular post', 'latest post', 'relevant articles'],
+    enum: ["popular post", "latest post", "relevant articles"],
+  },
+  relevantarticle: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Blog",
   },
 });
 

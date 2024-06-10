@@ -7,6 +7,7 @@ const errorHandler = require("./Middleware/errorMiddleware");
 const cookieParser = require("cookie-parser");
 const serviceRoute = require("./routes/servicesRoute");
 const propertyRoutes = require("./routes/propertyRoute");
+const NewPropController = require("./routes/NewPropRoute");
 const testimonialsRoute = require("./routes/testimonialsRoute");
 const blogRoute = require("./routes/blogRoutes");
 const authRoute = require("./routes/authRoute");
@@ -22,7 +23,7 @@ const Guide = require("./routes/guideRoutes");
 
 const app = express();
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5002;
 
 // Middleware setup
 app.use(bodyParser.json());
@@ -44,7 +45,8 @@ app.use("/api/agent", AgentQuestion);
 app.use("/api/project", ProjectRoute);
 app.use("/api/location", LocationRoute);
 app.use("/api/propsingle", PropSingle);
-app.use("/api/guide", PropSingle);
+app.use("/api/guide", Guide);
+app.use("/api/newproperty", NewPropController);
 
 app.get("/", (req, res) => {
   res.send("Home");
