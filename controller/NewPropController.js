@@ -1,8 +1,8 @@
-const NewProperty = require('../models/newPropertyModel');
-const cloudinary = require('cloudinary').v2;
+const NewProperty = require("../models/newPropertyModel");
+const cloudinary = require("cloudinary").v2;
 const { fileSizeFormatter } = require("../utils/fileUpload");
-const xlsx = require('xlsx');
-const fs = require('fs');
+const xlsx = require("xlsx");
+const fs = require("fs");
 
 cloudinary.config({
   cloud_name: "dmen2qi7t",
@@ -31,7 +31,7 @@ exports.createProperty = async (req, res) => {
       mapCoordinates,
       aboutDeveloper,
       localityOverview,
-      FaqData
+      FaqData,
     } = req.body;
 
     // Upload mainPic to Cloudinary
@@ -87,23 +87,25 @@ exports.createProperty = async (req, res) => {
 
     // Create new property
     const newProperty = await NewProperty.create({
-      title,
-      sideTitle,
-      currentStatus,
-      price,
-      about,
-      overview,
-      specification,
-      Amenities,
-      mapCoordinates,
-      aboutDeveloper,
-      localityOverview,
-      FaqData,
+      mainContent: {
+        title,
+        sideTitle,
+        currentStatus,
+        price,
+        about,
+        overview,
+        specification,
+        Amenities,
+        mapCoordinates,
+        aboutDeveloper,
+        localityOverview,
+        FaqData,
+      },
       imageContainer: {
         mainPic: mainPic,
         sidePics: sidePics,
         imageCarousel: imageCarousel,
-      }
+      },
     });
 
     res.status(201).json(newProperty);
@@ -112,7 +114,6 @@ exports.createProperty = async (req, res) => {
     res.status(500).json({ error: "Error creating property" });
   }
 };
-
 
 // Get all properties
 exports.getProperties = async (req, res) => {
@@ -129,7 +130,7 @@ exports.getPropertyById = async (req, res) => {
   try {
     const property = await NewProperty.findById(req.params.id);
     if (!property) {
-      return res.status(404).json({ message: 'Property not found' });
+      return res.status(404).json({ message: "Property not found" });
     }
     res.status(200).json(property);
   } catch (err) {
@@ -140,9 +141,13 @@ exports.getPropertyById = async (req, res) => {
 // Update a property by ID
 exports.updatePropertyById = async (req, res) => {
   try {
-    const updatedProperty = await NewProperty.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const updatedProperty = await NewProperty.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
     if (!updatedProperty) {
-      return res.status(404).json({ message: 'Property not found' });
+      return res.status(404).json({ message: "Property not found" });
     }
     res.status(200).json(updatedProperty);
   } catch (err) {
@@ -155,82 +160,90 @@ exports.deletePropertyById = async (req, res) => {
   try {
     const deletedProperty = await NewProperty.findByIdAndDelete(req.params.id);
     if (!deletedProperty) {
-      return res.status(404).json({ message: 'Property not found' });
+      return res.status(404).json({ message: "Property not found" });
     }
-    res.status(200).json({ message: 'Property deleted' });
+    res.status(200).json({ message: "Property deleted" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
 exports.uploadExcel = async (req, res) => {
-    try {
-        const file = req.file;
-        if (!file) {
-            return res.status(400).json({ message: 'Please upload an Excel file' });
-        }
-
-        // Read the Excel file from the buffer
-        const workbook = xlsx.read(file.buffer, { type: 'buffer' });
-        const sheet_name_list = workbook.SheetNames;
-        const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
-
-        const properties = data.map(item => ({
-            imageContainer: {
-                mainPic: item.mainPic,
-                sidePics: item.sidePics ? item.sidePics.split(',') : [],
-                imageCarasouel: item.imageCarasouel ? item.imageCarasouel.split(',') : []
-            },
-            mainContent: {
-                title: item.title,
-                sideTitle: item.sideTitle,
-                currentStatus: item.currentStatus,
-                price: item.price,
-                about: item.about,
-                overview: {
-                    projectArea: item.projectArea,
-                    launchDate: item.launchDate,
-                    configuration: item.configuration,
-                    sizes: item.sizes,
-                    avgPrice: item.avgPrice,
-                    projectSize: item.projectSize,
-                    possessionStatus: item.possessionStatus
-                },
-                specification: {
-                    Parking: { parkingInfo: item.parkingInfo ? item.parkingInfo.split(',') : [] },
-                    Interior: {
-                        virtualTour: item.virtualTour ? item.virtualTour.split(',') : [],
-                        bathroomInfo: item.bathroomInfo ? item.bathroomInfo.split(',') : [],
-                        bedroomInfo: item.bedroomInfo ? item.bedroomInfo.split(',') : [],
-                        roomInfo: item.roomInfo ? item.roomInfo.split(',') : [],
-                        addRoomInfo: item.addRoomInfo ? item.addRoomInfo.split(',') : [],
-                        interiorFeatures: item.interiorFeatures ? item.interiorFeatures.split(',') : []
-                    }
-                },
-                Amenities: item.amenities ? item.amenities.split(',') : [],
-                mapCoordinates: {
-                    latitude: item.latitude,
-                    longitude: item.longitude
-                },
-                aboutDeveloper: {
-                    logoSrc: item.logoSrc,
-                    developerInfo: item.developerInfo
-                },
-                localityOverview: {
-                    title: item.localityTitle,
-                    subtitle: item.localitySubtitle,
-                    introduction: item.localityIntroduction,
-                    Pros: item.localityPros ? item.localityPros.split(',') : [],
-                    Cons: item.localityCons ? item.localityCons.split(',') : []
-                },
-                FaqData: item.FaqData ? item.FaqData.split(',') : []
-            }
-        }));
-
-        await NewProperty.insertMany(properties);
-
-        res.status(201).json({ message: 'Properties uploaded successfully', properties });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+  try {
+    const file = req.file;
+    if (!file) {
+      return res.status(400).json({ message: "Please upload an Excel file" });
     }
+
+    // Read the Excel file from the buffer
+    const workbook = xlsx.read(file.buffer, { type: "buffer" });
+    const sheet_name_list = workbook.SheetNames;
+    const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheet_name_list[0]]);
+
+    const properties = data.map((item) => ({
+      imageContainer: {
+        mainPic: item.mainPic,
+        sidePics: item.sidePics ? item.sidePics.split(",") : [],
+        imageCarasouel: item.imageCarasouel
+          ? item.imageCarasouel.split(",")
+          : [],
+      },
+      mainContent: {
+        title: item.title,
+        sideTitle: item.sideTitle,
+        currentStatus: item.currentStatus,
+        price: item.price,
+        about: item.about,
+        overview: {
+          projectArea: item.projectArea,
+          launchDate: item.launchDate,
+          configuration: item.configuration,
+          sizes: item.sizes,
+          avgPrice: item.avgPrice,
+          projectSize: item.projectSize,
+          possessionStatus: item.possessionStatus,
+        },
+        specification: {
+          Parking: {
+            parkingInfo: item.parkingInfo ? item.parkingInfo.split(",") : [],
+          },
+          Interior: {
+            virtualTour: item.virtualTour ? item.virtualTour.split(",") : [],
+            bathroomInfo: item.bathroomInfo ? item.bathroomInfo.split(",") : [],
+            bedroomInfo: item.bedroomInfo ? item.bedroomInfo.split(",") : [],
+            roomInfo: item.roomInfo ? item.roomInfo.split(",") : [],
+            addRoomInfo: item.addRoomInfo ? item.addRoomInfo.split(",") : [],
+            interiorFeatures: item.interiorFeatures
+              ? item.interiorFeatures.split(",")
+              : [],
+          },
+        },
+        Amenities: item.amenities ? item.amenities.split(",") : [],
+        mapCoordinates: {
+          latitude: item.latitude,
+          longitude: item.longitude,
+        },
+        aboutDeveloper: {
+          logoSrc: item.logoSrc,
+          developerInfo: item.developerInfo,
+        },
+        localityOverview: {
+          title: item.localityTitle,
+          subtitle: item.localitySubtitle,
+          introduction: item.localityIntroduction,
+          Pros: item.localityPros ? item.localityPros.split(",") : [],
+          Cons: item.localityCons ? item.localityCons.split(",") : [],
+        },
+        FaqData: item.FaqData ? item.FaqData.split(",") : [],
+      },
+    }));
+
+    await NewProperty.insertMany(properties);
+
+    res
+      .status(201)
+      .json({ message: "Properties uploaded successfully", properties });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
