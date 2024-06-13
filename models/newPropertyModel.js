@@ -33,7 +33,7 @@ const newPropertySchema = new Schema({
         interiorFeatures: [{ type: String }]
       }
     },
-    Amenities: [{ type: Number }],
+    Amenities: [{ type: String }],
     mapCoordinates: {
       latitude: { type: String },
       longitude: { type: String }

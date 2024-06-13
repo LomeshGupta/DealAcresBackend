@@ -25,13 +25,32 @@ exports.createProperty = async (req, res) => {
       currentStatus,
       price,
       about,
-      overview,
-      specification,
+      projectArea,
+      launchDate,
+      configuration,
+      sizes,
+      avgPrice,
+      projectSize,
+      possessionStatus,
+      parkingInfo,
+      virtualTour,
+      bathroomInfo,
+      bedroomInfo,
+      roomInfo,
+      addRoomInfo,
+      interiorFeatures,
       Amenities,
-      mapCoordinates,
-      aboutDeveloper,
-      localityOverview,
-      FaqData,
+      latitude,
+      longitude,
+      logoSrc,
+      developerInfo,
+      loctitle,
+      locsubtitle,
+      locintroduction,
+      locPros,
+      locCons,
+      Q,
+      A,
     } = req.body;
 
     // Upload mainPic to Cloudinary
@@ -49,7 +68,7 @@ exports.createProperty = async (req, res) => {
       fileSize: fileSizeFormatter(mainPicFile.size, 2),
     };
 
-    // Upload sidePics to Cloudinary
+    // // Upload sidePics to Cloudinary
     const sidePics = await Promise.all(
       req.files["sidePics"].map(async (file) => {
         const uploadedFile = await cloudinary.uploader.upload(file.path, {
@@ -93,19 +112,54 @@ exports.createProperty = async (req, res) => {
         currentStatus,
         price,
         about,
-        overview,
-        specification,
+        overview: {
+          projectArea,
+          launchDate,
+          configuration,
+          sizes,
+          avgPrice,
+          projectSize,
+          possessionStatus,
+        },
+        specification: {
+          Parking: { parkingInfo },
+          Interior: {
+            virtualTour,
+            bathroomInfo,
+            bedroomInfo,
+            roomInfo,
+            addRoomInfo,
+            interiorFeatures,
+          },
+        },
         Amenities,
-        mapCoordinates,
-        aboutDeveloper,
-        localityOverview,
-        FaqData,
+        mapCoordinates: {
+          latitude,
+          longitude,
+        },
+        aboutDeveloper: {
+          logoSrc,
+          developerInfo,
+        },
+        localityOverview: {
+          title: loctitle,
+          subtitle: locsubtitle,
+          introduction: locintroduction,
+          Pros: locPros,
+          Cons: locCons,
+        },
+        FaqData: [
+          {
+            Q,
+            A,
+          },
+        ],
       },
-      imageContainer: {
-        mainPic: mainPic,
-        sidePics: sidePics,
-        imageCarousel: imageCarousel,
-      },
+      // imageContainer: {
+      //   mainPic: mainPic,
+      //   sidePics: sidePics,
+      //   imageCarousel: imageCarousel,
+      // },
     });
 
     res.status(201).json(newProperty);
