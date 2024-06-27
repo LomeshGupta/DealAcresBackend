@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const xlsx = require("xlsx");
 const NewProperty = require("../models/newPropertyModel");
 
 // Create a new property
