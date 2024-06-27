@@ -18,6 +18,9 @@ const parseNestedStructure = (data) => {
   // Parse JSON structures
   if (data.roomInfo) data.roomInfo = JSON.parse(data.roomInfo);
   if (data.FaqData) data.FaqData = JSON.parse(data.FaqData);
+  if (data.FaqData) data.FaqData = JSON.parse(data.FaqData);
+  if (data.LocPros) data.LocPros = JSON.parse(data.LocPros);
+  if (data.LocCons) data.LocCons = JSON.parse(data.LocCons);
 
   return data;
 };
