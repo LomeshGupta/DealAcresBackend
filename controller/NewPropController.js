@@ -1,8 +1,21 @@
 const express = require("express");
 const router = express.Router();
 const xlsx = require("xlsx");
-const fs = require("fs");
 const NewProperty = require("../models/newPropertyModel");
+
+// Helper function to parse nested structures
+const parseNestedStructure = (data) => {
+  // Parse arrays
+  if (data.sidePics) data.sidePics = data.sidePics.split(",");
+  if (data.bathroomInfo) data.bathroomInfo = data.bathroomInfo.split(",");
+  if (data.bedroomInfo) data.bedroomInfo = data.bedroomInfo.split(",");
+
+  // Parse JSON structures
+  if (data.roomInfo) data.roomInfo = JSON.parse(data.roomInfo);
+  if (data.FaqData) data.FaqData = JSON.parse(data.FaqData);
+
+  return data;
+};
 
 // Create a new property
 exports.createProperty = async (req, res) => {
@@ -77,8 +90,11 @@ exports.uploadExcelFile = async (req, res) => {
     const worksheet = workbook.Sheets[sheetName];
     const jsonData = xlsx.utils.sheet_to_json(worksheet);
 
+    // Process each row to handle nested structures
+    const processedData = jsonData.map(parseNestedStructure);
+
     // Insert data into the database
-    await NewProperty.insertMany(jsonData);
+    await NewProperty.insertMany(processedData);
 
     res
       .status(201)
