@@ -9,6 +9,7 @@ const parseNestedStructure = (data) => {
   if (data.sidePics) data.sidePics = data.sidePics.split(",");
   if (data.bathroomInfo) data.bathroomInfo = data.bathroomInfo.split(",");
   if (data.bedroomInfo) data.bedroomInfo = data.bedroomInfo.split(",");
+  if (data.Amenities) data.Amenities = data.Amenities.split(",");
 
   // Parse JSON structures
   if (data.roomInfo) data.roomInfo = JSON.parse(data.roomInfo);
