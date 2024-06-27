@@ -23,10 +23,6 @@ const parseNestedStructure = (data) => {
   if (data.roomInfo) data.roomInfo = JSON.parse(data.roomInfo);
   if (data.aboutDeveloper)
     data.aboutDeveloper = JSON.parse(data.aboutDeveloper);
-  if (!data.localityOverview)
-    {
-      return res.status(400).json({ message: "No loca" });
-    }
   if (data.localityOverview)
     data.localityOverview = JSON.parse(data.localityOverview);
   if (data.FaqData) {
@@ -124,6 +120,16 @@ exports.uploadExcelFile = async (req, res) => {
     res
       .status(201)
       .json({ message: "File uploaded and data inserted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Delete all properties
+exports.deleteAllProperties = async (req, res) => {
+  try {
+    await NewProperty.deleteMany({});
+    res.status(200).json({ message: "All properties deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
