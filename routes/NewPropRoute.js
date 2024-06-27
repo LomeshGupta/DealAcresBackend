@@ -15,6 +15,6 @@ router.post(
   uploads.single("file"),
   propertyController.uploadExcelFile
 );
-router.delete("/properties", propertyController.deleteAllProperties);
+router.delete("/", propertyController.deleteAllProperties);
 
 module.exports = router;
