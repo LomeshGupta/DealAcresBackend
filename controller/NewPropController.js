@@ -68,21 +68,17 @@ exports.deletePropertyById = async (req, res) => {
 // Upload and parse Excel file
 exports.uploadExcelFile = async (req, res) => {
   try {
-    if (!req.file || !req.file.path) {
+    if (!req.file || !req.file.buffer) {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    const file = req.file;
-    const workbook = xlsx.readFile(file.path);
+    const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
     const jsonData = xlsx.utils.sheet_to_json(worksheet);
 
     // Insert data into the database
     await NewProperty.insertMany(jsonData);
-
-    // Delete the uploaded file after processing
-    fs.unlinkSync(file.path);
 
     res
       .status(201)

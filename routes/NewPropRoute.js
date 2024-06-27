@@ -4,11 +4,6 @@ const multer = require("multer");
 const storage = multer.memoryStorage();
 const uploads = multer({ storage: storage });
 const router = express.Router();
-// const { upload } = require("../utils/fileUpload");
-
-// const authMiddleware = require("../Middleware/authMiddleware");
-
-// router.use(authMiddleware);
 
 router.post("/", propertyController.createProperty);
 router.get("/", propertyController.getAllProperties);
