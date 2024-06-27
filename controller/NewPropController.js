@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const xlsx = require("xlsx");
+const fs = require("fs");
 const NewProperty = require("../models/newPropertyModel");
 
 // Create a new property
@@ -67,6 +68,10 @@ exports.deletePropertyById = async (req, res) => {
 // Upload and parse Excel file
 exports.uploadExcelFile = async (req, res) => {
   try {
+    if (!req.file || !req.file.path) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
     const file = req.file;
     const workbook = xlsx.readFile(file.path);
     const sheetName = workbook.SheetNames[0];
@@ -75,6 +80,9 @@ exports.uploadExcelFile = async (req, res) => {
 
     // Insert data into the database
     await NewProperty.insertMany(jsonData);
+
+    // Delete the uploaded file after processing
+    fs.unlinkSync(file.path);
 
     res
       .status(201)
