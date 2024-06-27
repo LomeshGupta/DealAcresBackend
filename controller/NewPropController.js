@@ -23,6 +23,10 @@ const parseNestedStructure = (data) => {
   if (data.roomInfo) data.roomInfo = JSON.parse(data.roomInfo);
   if (data.aboutDeveloper)
     data.aboutDeveloper = JSON.parse(data.aboutDeveloper);
+  if (!data.localityOverview)
+    {
+      return res.status(400).json({ message: "No loca" });
+    }
   if (data.localityOverview)
     data.localityOverview = JSON.parse(data.localityOverview);
   if (data.FaqData) {
