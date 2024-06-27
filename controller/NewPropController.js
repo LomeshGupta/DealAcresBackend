@@ -14,13 +14,26 @@ const parseNestedStructure = (data) => {
       Number(item.trim())
     );
   }
+  if (data.virtualTour) data.virtualTour = data.virtualTour.split(",");
+  if (data.addRoomInfo) data.addRoomInfo = data.addRoomInfo.split(",");
+  if (data.interiorFeatures)
+    data.interiorFeatures = data.interiorFeatures.split(",");
 
   // Parse JSON structures
   if (data.roomInfo) data.roomInfo = JSON.parse(data.roomInfo);
-  if (data.FaqData) data.FaqData = JSON.parse(data.FaqData);
-  if (data.FaqData) data.FaqData = JSON.parse(data.FaqData);
-  if (data.LocPros) data.LocPros = JSON.parse(data.LocPros);
-  if (data.LocCons) data.LocCons = JSON.parse(data.LocCons);
+  if (data.aboutDeveloper)
+    data.aboutDeveloper = JSON.parse(data.aboutDeveloper);
+  if (data.localityOverview)
+    data.localityOverview = JSON.parse(data.localityOverview);
+  if (data.FaqData) {
+    // Handle potential JSON parsing errors in FaqData
+    try {
+      data.FaqData = JSON.parse(data.FaqData);
+    } catch (error) {
+      console.error(`Error parsing FaqData: ${error.message}`);
+      data.FaqData = []; // Handle gracefully if parsing fails
+    }
+  }
 
   return data;
 };

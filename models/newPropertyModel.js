@@ -49,11 +49,13 @@ const newPropertySchema = new Schema({
     logoSrc: { type: String },
     developerInfo: { type: String },
   },
-  LocId: { type: String },
-  LocaTitle: { type: String },
-  LocDescription: { type: String },
-  LocPros: [{ type: String }],
-  LocCons: [{ type: String }],
+  localityOverview: {
+    LocId: { type: String },
+    LocaTitle: { type: String },
+    LocDescription: { type: String },
+    LocPros: [{ type: String }],
+    LocCons: [{ type: String }],
+  },
   FaqData: [
     {
       Q: { type: String },
