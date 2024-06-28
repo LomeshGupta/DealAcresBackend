@@ -72,12 +72,20 @@ exports.getAllProperties = async (req, res) => {
       filter.PropertyType = PropertyType;
     }
 
-    const properties = await NewProperty.find(
-      Object.keys(filter).length ? filter : {}
-    );
+    // Logging the filter to verify what's being passed
+    console.log("Filter:", filter);
+
+    // Query the database using the filter
+    const properties = await NewProperty.find(filter);
+
+    // Returning the properties as JSON response
     res.status(200).json(properties);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    // Handling any errors and returning an error response
+    console.error("Error fetching properties:", error.message);
+    res
+      .status(500)
+      .json({ message: "Error fetching properties", error: error.message });
   }
 };
 
