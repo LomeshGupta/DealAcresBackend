@@ -58,10 +58,23 @@ exports.createProperty = async (req, res) => {
   }
 };
 
-// Get all properties
+// Get all properties with optional filtering by status and type
 exports.getAllProperties = async (req, res) => {
   try {
-    const properties = await NewProperty.find();
+    const { status, type } = req.query;
+    const filter = {};
+
+    if (status) {
+      filter.status = status;
+    }
+
+    if (type) {
+      filter.type = type;
+    }
+
+    const properties = await NewProperty.find(
+      Object.keys(filter).length ? filter : {}
+    );
     res.status(200).json(properties);
   } catch (error) {
     res.status(500).json({ message: error.message });
