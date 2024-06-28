@@ -4,31 +4,40 @@ const xlsx = require("xlsx");
 const NewProperty = require("../models/newPropertyModel");
 
 // Helper function to parse nested structures
+// Helper function to parse nested structures
 const parseNestedStructure = (data) => {
+  const cleanString = (str) => {
+    return str.replace(/[\r\n\t]/g, "").trim();
+  };
+
   // Parse arrays
-  if (data.sidePics) data.sidePics = data.sidePics.split(",");
-  if (data.bathroomInfo) data.bathroomInfo = data.bathroomInfo.split(",");
-  if (data.bedroomInfo) data.bedroomInfo = data.bedroomInfo.split(",");
+  if (data.sidePics) data.sidePics = cleanString(data.sidePics).split(",");
+  if (data.bathroomInfo)
+    data.bathroomInfo = cleanString(data.bathroomInfo).split(",");
+  if (data.bedroomInfo)
+    data.bedroomInfo = cleanString(data.bedroomInfo).split(",");
   if (data.Amenities) {
-    data.Amenities = data.Amenities.split(",").map((item) =>
-      Number(item.trim())
-    );
+    data.Amenities = cleanString(data.Amenities)
+      .split(",")
+      .map((item) => Number(item.trim()));
   }
-  if (data.virtualTour) data.virtualTour = data.virtualTour.split(",");
-  if (data.addRoomInfo) data.addRoomInfo = data.addRoomInfo.split(",");
+  if (data.virtualTour)
+    data.virtualTour = cleanString(data.virtualTour).split(",");
+  if (data.addRoomInfo)
+    data.addRoomInfo = cleanString(data.addRoomInfo).split(",");
   if (data.interiorFeatures)
-    data.interiorFeatures = data.interiorFeatures.split(",");
+    data.interiorFeatures = cleanString(data.interiorFeatures).split(",");
 
   // Parse JSON structures
-  if (data.roomInfo) data.roomInfo = JSON.parse(data.roomInfo);
+  if (data.roomInfo) data.roomInfo = JSON.parse(cleanString(data.roomInfo));
   if (data.aboutDeveloper)
-    data.aboutDeveloper = JSON.parse(data.aboutDeveloper);
+    data.aboutDeveloper = JSON.parse(cleanString(data.aboutDeveloper));
   if (data.localityOverview)
-    data.localityOverview = JSON.parse(data.localityOverview);
+    data.localityOverview = JSON.parse(cleanString(data.localityOverview));
   if (data.FaqData) {
     // Handle potential JSON parsing errors in FaqData
     try {
-      data.FaqData = JSON.parse(data.FaqData);
+      data.FaqData = JSON.parse(cleanString(data.FaqData));
     } catch (error) {
       console.error(`Error parsing FaqData: ${error.message}`);
       data.FaqData = []; // Handle gracefully if parsing fails
