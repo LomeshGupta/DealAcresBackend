@@ -61,15 +61,15 @@ exports.createProperty = async (req, res) => {
 // Get all properties with optional filtering by status and type
 exports.getAllProperties = async (req, res) => {
   try {
-    const { Status, type } = req.query;
+    const { Status, PropertyType } = req.query;
     const filter = {};
 
     if (Status) {
       filter.Status = Status;
     }
 
-    if (type) {
-      filter.type = type;
+    if (PropertyType) {
+      filter.PropertyType = PropertyType;
     }
 
     const properties = await NewProperty.find(
