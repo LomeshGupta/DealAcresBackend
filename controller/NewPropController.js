@@ -34,6 +34,7 @@ const parseNestedStructure = (data) => {
     data.aboutDeveloper = JSON.parse(cleanString(data.aboutDeveloper));
   if (data.localityOverview)
     data.localityOverview = JSON.parse(cleanString(data.localityOverview));
+  if (data.overview) data.overview = JSON.parse(cleanString(data.overview));
   if (data.FaqData) {
     // Handle potential JSON parsing errors in FaqData
     try {
