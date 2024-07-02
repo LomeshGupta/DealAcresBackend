@@ -1,8 +1,9 @@
-// Import the User model
 const bcrypt = require("bcryptjs");
-const User = require("../models/userModel");
-const { fileSizeFormatter } = require("../utils/fileUpload");
+const User = require("../models/User");
+const XLSX = require("xlsx");
 const cloudinary = require("cloudinary").v2;
+const { fileSizeFormatter } = require("../utils/fileUpload");
+const multer = require("multer");
 
 cloudinary.config({
   cloud_name: "dmen2qi7t",
@@ -10,7 +11,8 @@ cloudinary.config({
   api_secret: "xTxrl7ezipvf-fuWZ-Gm33wDvL0",
 });
 
-// Controller functions for user operations
+const upload = multer({ storage: multer.memoryStorage() });
+
 const userController = {
   // Create a new user
   createUser: async (req, res) => {
@@ -31,7 +33,6 @@ const userController = {
             fileSize: fileSizeFormatter(file.size, 2),
           });
         } catch (uploadError) {
-          // Handle Cloudinary upload error
           console.error("Cloudinary upload error:", uploadError);
           return res
             .status(500)
@@ -122,10 +123,11 @@ const userController = {
       res.status(500).json({ message: error.message });
     }
   },
+
   // Controller for handling user likes
   likeUser: async (req, res, next) => {
-    const { userId } = req.params; // Assuming userId is passed in the request parameters
-    const { likerId } = req.body; // Assuming likerId (the user who liked) is passed in the request body
+    const { userId } = req.params;
+    const { likerId } = req.body;
 
     try {
       const user = await User.findById(userId);
@@ -151,8 +153,8 @@ const userController = {
 
   // Controller for handling user ratings
   rateUser: async (req, res, next) => {
-    const { userId } = req.params; // Assuming userId is passed in the request parameters
-    const { raterId, rating } = req.body; // Assuming raterId (the user who rated) and rating are passed in the request body
+    const { userId } = req.params;
+    const { raterId, rating } = req.body;
 
     try {
       const user = await User.findById(userId);
@@ -177,6 +179,52 @@ const userController = {
       return res
         .status(500)
         .json({ message: "Internal server error", error: err });
+    }
+  },
+
+  // Upload Excel file and create users
+  uploadExcel: async (req, res) => {
+    try {
+      const file = req.file;
+
+      if (!file) {
+        return res.status(400).send("No file uploaded.");
+      }
+
+      const workbook = XLSX.read(file.buffer, { type: "buffer" });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+      const users = worksheet.map((row) => ({
+        username: row.username,
+        firstName: row.firstName,
+        lastName: row.lastName,
+        email: row.email,
+        password: bcrypt.hashSync(row.password, 10),
+        phone: row.phone,
+        address: row.address,
+        city: row.city,
+        state: row.state,
+        zipCode: row.zipCode,
+        role: row.role,
+        agency: row.agency,
+        licenseNumber: row.licenseNumber,
+        experience: row.experience,
+        cities: row.cities ? row.cities.split(",") : [],
+        description: row.description,
+        chairman: row.chairman,
+        chairmanMessage: row.chairmanMessage,
+        mission: row.mission,
+        vision: row.vision,
+        faqData: row.faqData ? JSON.parse(row.faqData) : [],
+      }));
+
+      await User.insertMany(users);
+
+      res.status(200).send("Users uploaded successfully");
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Error uploading users");
     }
   },
 };

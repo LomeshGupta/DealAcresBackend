@@ -4,6 +4,7 @@ const userController = require("../controller/userController");
 const authMiddleware = require("../Middleware/adminMiddleware");
 const authMiddleware1 = require("../Middleware/authMiddleware");
 const { upload } = require("../utils/fileUpload");
+const uploads = multer({ storage: multer.memoryStorage() });
 
 // Create a new user (registration)
 router.post("/", upload.array("image"), userController.createUser);
@@ -25,5 +26,8 @@ router.post("/:id/like", authMiddleware1, userController.likeUser);
 
 // Route for rating a user
 router.post("/:id/rate", authMiddleware1, userController.rateUser);
+
+// Route for Excel Upload
+router.post("/upload", upload.single("file"), userController.uploadExcel);
 
 module.exports = router;
