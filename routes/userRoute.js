@@ -27,7 +27,7 @@ router.post("/:id/like", authMiddleware1, userController.likeUser);
 // Route for rating a user
 router.post("/:id/rate", authMiddleware1, userController.rateUser);
 
-// Route for Excel Upload
+// Route for Excel Uplo
 router.post("/upload", upload.single("file"), userController.uploadExcel);
 
 module.exports = router;
