@@ -12,10 +12,10 @@ const uploads = multer({ storage: storage });
 router.post("/", upload.array("image"), userController.createUser);
 
 // Get all users (admin only)
-router.get("/", authMiddleware, userController.getAllUsers);
+router.get("/", userController.getAllUsers);
 
 // Get user by ID (admin only)
-router.get("/:id", authMiddleware, userController.getUserById);
+router.get("/:id", userController.getUserById);
 
 // Update user by ID (admin only)
 router.put("/:id", authMiddleware, userController.updateUserById);
