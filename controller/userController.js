@@ -199,7 +199,7 @@ const userController = {
         username: row.username,
         firstName: row.firstName,
         lastName: row.lastName,
-        // email: row.email,
+        email: row.email,
         password: bcrypt.hashSync(row.password, 10),
         phone: row.phone,
         address: row.address,
