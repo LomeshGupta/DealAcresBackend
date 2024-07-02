@@ -223,8 +223,8 @@ const userController = {
 
       res.status(200).send("Users uploaded successfully");
     } catch (error) {
-      console.error(error);
-      res.status(500).send("Error uploading users");
+      console.error("Error uploading users:", error.message);
+      res.status(500).send("Error uploading users: " + error.message);
     }
   },
 };
