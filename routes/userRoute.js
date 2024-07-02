@@ -32,4 +32,7 @@ router.post("/:id/rate", authMiddleware1, userController.rateUser);
 // Route for Excel Uplo
 router.post("/upload", uploads.single("file"), userController.uploadExcel);
 
+//Route for Deleting All Users
+router.delete("/", userController.deleteAllUsers);
+
 module.exports = router;
