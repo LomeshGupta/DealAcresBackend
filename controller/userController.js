@@ -209,6 +209,7 @@ const userController = {
         role: row.role,
         agency: row.agency,
         licenseNumber: row.licenseNumber,
+        image: row.image,
         experience: row.experience,
         cities: row.cities ? row.cities.split(",") : [],
         description: row.description,
