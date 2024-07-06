@@ -1,29 +1,40 @@
-var mongoose = require("mongoose");
+const mongoose = require("mongoose");
 
-var serviceSchema = mongoose.Schema;
-
-var serviceDetail = new serviceSchema(
+const serviceSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      require: [true, "Please add a service name"],
+      required: [true, "Please add a service name"],
     },
-    description: {
+    HeroImg: {
       type: String,
-      require: [true, "Please add description"],
     },
-    path: {
-      type: String,
-      require: [true, "Please add your path"],
-    },
-    image_url: {
-      type: [{}],
-      require: [true, "Please add your image url"],
-    },
+    experts: [
+      {
+        name: String,
+        address: String,
+        img: String,
+        contact: String,
+      },
+    ],
+    content: [
+      {
+        title: String,
+        desc: String,
+        img: String,
+      },
+    ],
+    faq: [
+      {
+        Q: String,
+        A: String,
+      },
+    ],
   },
   {
     timestamps: true,
   }
 );
-const Service = mongoose.model("Service", serviceDetail);
+
+const Service = mongoose.model("Service", serviceSchema);
 module.exports = Service;

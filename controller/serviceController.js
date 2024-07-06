@@ -1,10 +1,9 @@
 const asyncHandler = require("express-async-handler");
 const Service = require("../models/serviceModel");
-const { json } = require("body-parser");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const { fileSizeFormatter } = require("../utils/fileUpload");
+const multer = require("multer");
+const XLSX = require("xlsx");
 const cloudinary = require("cloudinary").v2;
+const { fileSizeFormatter } = require("../utils/fileUpload");
 
 cloudinary.config({
   cloud_name: "dmen2qi7t",
@@ -12,77 +11,58 @@ cloudinary.config({
   api_secret: "xTxrl7ezipvf-fuWZ-Gm33wDvL0",
 });
 
-//get all users----------------------------------------------
+// Configure multer for file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
+// Get all services
 const getService = asyncHandler(async (req, res) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   const services = await Service.find();
   res.status(200).json(services);
 });
 
-//delete one service------------------------------------------
-const deleteService = async (req, res) => {
-  const service = await Service.findByIdAndDelete(req.params.id);
-  res.status(200);
-  res.send("deleted successfully");
-};
+// Get single service
+const getSingleService = asyncHandler(async (req, res) => {
+  const service = await Service.findById(req.params.id);
+  if (service) {
+    res.status(200).json(service);
+  } else {
+    res.status(404).json({ message: "Service not found" });
+  }
+});
 
-//register service ---------------------------------------------
+// Add new service
 const addService = asyncHandler(async (req, res) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  const { name, experts, content, faq } = req.body;
 
-  const { name, description, path } = req.body;
-
-  //validations
-  if (!name || !description || !path) {
+  // Validations
+  if (!name) {
     res.status(400);
     throw new Error("Please enter all required fields.");
   }
 
-  let fileData = [];
+  let heroImgUrl = "";
 
   try {
-    for (const file of req.files) {
-      const uploadedFile = await cloudinary.uploader.upload(file.path, {
+    if (req.file) {
+      const uploadedFile = await cloudinary.uploader.upload(req.file.path, {
         folder: "service_dealacres",
-        public_id: `${Date.now()}-${file.originalname}`,
+        public_id: `${Date.now()}-${req.file.originalname}`,
         resource_type: "image",
       });
-      fileData.push({
-        fileName: file.originalname,
-        filePath: uploadedFile.secure_url,
-        fileId: `${Date.now()}-${file.originalname}`,
-        fileType: file.mimetype,
-        fileSize: fileSizeFormatter(file.size, 2),
-      });
+      heroImgUrl = uploadedFile.secure_url;
     }
 
-    //create new service
-
+    // Create new service
     const service = await Service.create({
       name,
-      description,
-      path,
-      image_url: fileData,
+      HeroImg: heroImgUrl,
+      experts: JSON.parse(experts),
+      content: JSON.parse(content),
+      faq: JSON.parse(faq),
     });
 
-    if (service) {
-      const { _id, name, path, image_url } = service;
-      res.status(201).json({
-        _id,
-        name,
-        path,
-        image_url,
-      });
-    } else {
-      res.status(400);
-      throw new Error("Invalid service data");
-    }
-    // res.json({ imageUrl: url });
+    res.status(201).json(service);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Image could not be uploaded" });
@@ -91,54 +71,69 @@ const addService = asyncHandler(async (req, res) => {
 
 // Update service
 const updateService = asyncHandler(async (req, res) => {
-  // const service = await Service.findById(req.body._id);
-
   try {
-    // const { name, description, path, image_url } = service;
-    // service.name = req.body.name || name;
-    // service.description = req.body.description || description;
-    // service.path = req.body.path || path;
-    // service.image_url = req.body || image_url;
-
-    // const updatedService = await service.save();
-
     const updatedService = await Service.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true }
     );
-    res.status(200).json({
-      _id: updatedService._id,
-      name: updatedService.name,
-      description: updatedService.description,
-      path: updatedService.path,
-      image_url: updateService.image_url,
-    });
+    res.status(200).json(updatedService);
   } catch (error) {
     res.status(404);
     throw new Error("Service not found");
   }
 });
 
-//get single
-
-const getSingleService = async (req, res) => {
-  try {
-    const service = await Service.findById(req.params.id);
-    if (service) {
-      res.status(200).json(service);
-    } else {
-      res.status(404).json({ message: "Service not found" });
-    }
-  } catch (error) {
-    res.status(500).json({ error: "Error retrieving Service" });
+// Delete service
+const deleteService = asyncHandler(async (req, res) => {
+  const service = await Service.findByIdAndDelete(req.params.id);
+  if (service) {
+    res.status(200).json({ message: "Service deleted successfully" });
+  } else {
+    res.status(404).json({ message: "Service not found" });
   }
-};
+});
+
+// Delete all services
+const deleteAllServices = asyncHandler(async (req, res) => {
+  try {
+    await Service.deleteMany({});
+    res.status(200).json({ message: "All services deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Error deleting services" });
+  }
+});
+
+// Upload services data from an Excel file
+const excelUpload = asyncHandler(async (req, res) => {
+  try {
+    const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const data = XLSX.utils.sheet_to_json(sheet);
+
+    const services = data.map((item) => ({
+      name: item.name,
+      HeroImg: item.HeroImg,
+      experts: JSON.parse(item.Experts),
+      content: JSON.parse(item.content),
+      faq: JSON.parse(item.FaqData),
+    }));
+
+    await Service.insertMany(services);
+    res.status(201).json({ message: "Services uploaded successfully" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
 
 module.exports = {
   getService,
   addService,
   updateService,
   deleteService,
+  deleteAllServices,
   getSingleService,
+  excelUpload,
+  upload,
 };
