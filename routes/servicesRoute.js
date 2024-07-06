@@ -11,9 +11,9 @@ const {
 
 const router = express.Router();
 const { upload } = require("../utils/fileUpload");
-const authMiddleware = require("../Middleware/authMiddleware");
+// const authMiddleware = require("../Middleware/authMiddleware");
 
-router.use(authMiddleware);
+// router.use(authMiddleware);
 
 router.get("/", getService);
 router.get("/:id", getSingleService);
