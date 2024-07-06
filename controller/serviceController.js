@@ -130,5 +130,4 @@ module.exports = {
   deleteAllServices,
   getSingleService,
   excelUpload,
-  upload,
 };
