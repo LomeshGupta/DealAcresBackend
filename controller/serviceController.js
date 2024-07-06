@@ -1,6 +1,5 @@
 const asyncHandler = require("express-async-handler");
 const Service = require("../models/serviceModel");
-const multer = require("multer");
 const XLSX = require("xlsx");
 const cloudinary = require("cloudinary").v2;
 const { fileSizeFormatter } = require("../utils/fileUpload");
@@ -10,10 +9,6 @@ cloudinary.config({
   api_key: "426686656792964",
   api_secret: "xTxrl7ezipvf-fuWZ-Gm33wDvL0",
 });
-
-// Configure multer for file uploads
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
 
 // Get all services
 const getService = asyncHandler(async (req, res) => {
