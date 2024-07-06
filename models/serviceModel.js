@@ -6,6 +6,9 @@ const serviceSchema = new mongoose.Schema(
       type: String,
       required: [true, "Please add a service name"],
     },
+    type: {
+      type: String,
+    },
     HeroImg: {
       type: String,
     },

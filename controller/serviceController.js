@@ -28,7 +28,7 @@ const getSingleService = asyncHandler(async (req, res) => {
 
 // Add new service
 const addService = asyncHandler(async (req, res) => {
-  const { name, experts, content, faq } = req.body;
+  const { name, type, experts, content, faq } = req.body;
 
   // Validations
   if (!name) {
@@ -51,6 +51,7 @@ const addService = asyncHandler(async (req, res) => {
     // Create new service
     const service = await Service.create({
       name,
+      type,
       HeroImg: heroImgUrl,
       experts: JSON.parse(experts),
       content: JSON.parse(content),
@@ -109,6 +110,7 @@ const excelUpload = asyncHandler(async (req, res) => {
 
     const services = data.map((item) => ({
       name: item.name,
+      type: item.type,
       HeroImg: item.HeroImg,
       experts: JSON.parse(item.Experts),
       content: JSON.parse(item.content),
