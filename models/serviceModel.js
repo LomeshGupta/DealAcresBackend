@@ -9,6 +9,15 @@ const serviceSchema = new mongoose.Schema(
     type: {
       type: String,
     },
+    homepageshow: {
+      type: String,
+    },
+    icon: {
+      type: String,
+    },
+    tagline: {
+      type: String,
+    },
     HeroImg: {
       type: String,
     },

@@ -1,19 +1,19 @@
 const mongoose = require("mongoose");
 
 const testimonialSchema = new mongoose.Schema({
-  propertyId: {
+  img: {
     type: String,
-    required: true,
+    // required: true,
+  },
+  name: {
+    type: String,
+    // required: true,
+  },
+  role: {
+    type: String,
   },
   content: {
     type: String,
-    required: true,
-  },
-  rating: {
-    type: Number,
-    min: 1,
-    max: 5,
-    required: true,
   },
   createdAt: {
     type: Date,

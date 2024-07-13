@@ -1,23 +1,25 @@
+// routes/router.js
 const express = require("express");
 const router = express.Router();
-const testimonialController = require('../controller/testimonialController');
-const authMiddleware = require('../Middleware/authMiddleware');
+const multer = require("multer");
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
-router.use(authMiddleware);
+const testimonialController = require("../controller/testimonialController");
 
-// Route to create a new testimonial
-router.post('/', testimonialController.createTestimonial);
+// CRUD operations for testimonials
+router.post("/", testimonialController.createTestimonial);
+router.get("/", testimonialController.getAllTestimonials);
+router.get("/:id", testimonialController.getTestimonialById);
+router.put("/:id", testimonialController.updateTestimonial);
+router.delete("/:id", testimonialController.deleteTestimonial);
+router.delete("/", testimonialController.deleteAllTestimonials);
 
-// Route to get all testimonials
-router.get('/', testimonialController.getAllTestimonials);
-
-// Route to get a single testimonial by ID
-router.get('/:id', testimonialController.getTestimonialById);
-
-// Route to update a testimonial by ID
-router.put('/:id', testimonialController.updateTestimonial);
-
-// Route to delete a testimonial by ID
-router.delete('/:id', testimonialController.deleteTestimonial);
+// Excel uploader route
+router.post(
+  "/upload",
+  upload.single("file"),
+  testimonialController.uploadExcel
+);
 
 module.exports = router;

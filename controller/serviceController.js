@@ -111,6 +111,9 @@ const excelUpload = asyncHandler(async (req, res) => {
     const services = data.map((item) => ({
       name: item.name,
       type: item.type,
+      homepageshow: item.homepageshow,
+      icon: item.icon,
+      tagline: item.tagline,
       HeroImg: item.HeroImg,
       experts: JSON.parse(item.Experts),
       content: JSON.parse(item.content),
