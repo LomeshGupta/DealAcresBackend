@@ -37,7 +37,7 @@ const authController = {
         secure: process.env.NODE_ENV === "production" ? true : false,
       });
 
-      res.json({ message: "Login successful" });
+      res.json({ token: token, message: "Login successful" });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
