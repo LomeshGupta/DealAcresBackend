@@ -42,6 +42,9 @@ const serviceSchema = new mongoose.Schema(
         A: String,
       },
     ],
+    logo: {
+      type: String,
+    },
   },
   {
     timestamps: true,

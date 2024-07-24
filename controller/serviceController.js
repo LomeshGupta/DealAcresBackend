@@ -118,6 +118,7 @@ const excelUpload = asyncHandler(async (req, res) => {
       experts: JSON.parse(item.Experts),
       content: JSON.parse(item.content),
       faq: JSON.parse(item.FaqData),
+      logo: item.logo,
     }));
 
     await Service.insertMany(services);
