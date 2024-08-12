@@ -106,34 +106,49 @@ exports.createBlogPost = async (req, res) => {
 // Function to get all blog posts
 exports.getAllBlogPosts = async (req, res) => {
   try {
-    const { sort, range, filter } = req.query;
+    const { sort, range, filter, category, tag } = req.query;
     const conditions = {};
 
+    // Handle filter query
     if (filter) {
       Object.assign(conditions, JSON.parse(filter));
     }
 
+    // Handle category and tag filtering
+    if (category) {
+      conditions.Category = category;
+    }
+    if (tag) {
+      conditions.Tags = tag;
+    }
+
     let sortOptions = {};
 
+    // Handle sorting
     if (sort) {
       const [field, order] = JSON.parse(sort);
       sortOptions[field] = order === "ASC" ? 1 : -1;
     }
 
+    // Get the total count of documents
     const totalCount = await Blog.countDocuments(conditions);
+
     let paginationOptions = {};
 
+    // Handle pagination
     if (range) {
       const [start, end] = JSON.parse(range);
       paginationOptions.skip = start;
       paginationOptions.limit = end - start + 1;
     }
 
+    // Fetch the blog posts
     const blogPosts = await Blog.find(conditions)
       .sort(sortOptions)
       .skip(paginationOptions.skip)
       .limit(paginationOptions.limit);
 
+    // Set the content range header
     const startRange = paginationOptions.skip;
     const endRange = startRange + blogPosts.length - 1;
     const contentRange = `posts ${startRange}-${endRange}/${totalCount}`;
@@ -141,6 +156,7 @@ exports.getAllBlogPosts = async (req, res) => {
     res.setHeader("Content-Range", contentRange);
     res.setHeader("Access-Control-Expose-Headers", "Content-Range");
 
+    // Return the blog posts
     res.status(200).json(blogPosts);
   } catch (error) {
     res.status(500).json({ message: error.message });
