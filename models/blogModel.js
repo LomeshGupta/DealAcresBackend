@@ -2,42 +2,42 @@ const mongoose = require("mongoose");
 
 // Define the blog post schema
 const blogSchema = new mongoose.Schema({
-  title: {
+  HeroImg: {
     type: String,
-    required: true,
   },
-  content: {
+  Category: {
     type: String,
-    required: true,
   },
-  author: {
-    type: String,
-    required: true,
-  },
-  image: [{ type: String }],
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
-  tags: [
+  Tags: [
     {
       type: String,
     },
   ],
-  dateOfBlogPosted: {
-    type: Date,
-  },
-  featuredBlog: {
+  Title: {
     type: String,
-    enum: ["popular post", "latest post", "relevant articles"],
   },
-  relevantarticle: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Blog",
+  Subtitle: {
+    type: String,
+  },
+  Content: [
+    {
+      title: { type: String },
+      description: { type: String },
+      img: { type: String },
+    },
+  ],
+  FAQs: [
+    {
+      Q: { type: String },
+      A: { type: String },
+    },
+  ],
+  Date: {
+    type: Date,
+    default: Date.now,
+  },
+  Author: {
+    type: String,
   },
 });
 

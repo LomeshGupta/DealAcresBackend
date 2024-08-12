@@ -1,6 +1,8 @@
 const Blog = require("../models/blogModel");
 const { fileSizeFormatter } = require("../utils/fileUpload");
 const cloudinary = require("cloudinary").v2;
+const xlsx = require("xlsx");
+const fs = require("fs");
 
 cloudinary.config({
   cloud_name: "dmen2qi7t",
@@ -8,43 +10,91 @@ cloudinary.config({
   api_secret: "xTxrl7ezipvf-fuWZ-Gm33wDvL0",
 });
 
+exports.uploadExcelFile = async (req, res) => {
+  try {
+    // Check if an Excel file is provided
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    // Parse the Excel file
+    const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const jsonData = xlsx.utils.sheet_to_json(worksheet);
+
+    // Process each row in the Excel file
+    const blogPosts = jsonData.map((row) => ({
+      HeroImg: row.HeroImg,
+      Category: row.Category,
+      Tags: row.Tags ? row.Tags.split(",") : [],
+      Title: row.Title,
+      Subtitle: row.Subtitle,
+      Content: row.Content ? JSON.parse(row.Content) : [],
+      FAQs: row.FAQs ? JSON.parse(row.FAQs) : [],
+      Date: row.Date || Date.now(),
+      Author: row.Author,
+    }));
+
+    // Save blog posts to the database
+    const savedBlogPosts = await Blog.insertMany(blogPosts);
+
+    // Delete the uploaded Excel file after processing
+    fs.unlinkSync(req.file.path);
+
+    // Respond with the saved blog posts
+    res.status(201).json(savedBlogPosts);
+  } catch (error) {
+    console.error("Error processing Excel file:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+};
+
 // Controller function to create a new blog post
 exports.createBlogPost = async (req, res) => {
   let fileData = [];
   try {
-    const { title, content, author, tags, dateOfBlogPosted, featuredBlog, relevantarticle } = req.body;
+    const {
+      HeroImg,
+      Category,
+      Tags,
+      Title,
+      Subtitle,
+      Content,
+      FAQs,
+      Date,
+      Author,
+    } = req.body;
 
-    for (const file of req.files) {
+    // Upload HeroImg to Cloudinary
+    if (req.file) {
       try {
-        const uploadedFile = await cloudinary.uploader.upload(file.path, {
+        const uploadedFile = await cloudinary.uploader.upload(req.file.path, {
           folder: "blogs_dealacres",
-          public_id: `${Date.now()}-${file.originalname}`,
-          resource_type: "auto",
+          public_id: `${Date.now()}-${req.file.originalname}`,
+          resource_type: "image",
         });
-        fileData.push({
-          fileName: file.originalname,
-          filePath: uploadedFile.secure_url,
-          fileId: uploadedFile.public_id,
-          fileType: file.mimetype,
-          fileSize: fileSizeFormatter(file.size, 2),
-        });
+        HeroImg = uploadedFile.secure_url;
       } catch (uploadError) {
-        // Handle Cloudinary upload error
         console.error("Cloudinary upload error:", uploadError);
-        return res.status(500).json({ message: "Error uploading file to Cloudinary." });
+        return res
+          .status(500)
+          .json({ message: "Error uploading image to Cloudinary." });
       }
     }
 
-    const newBlogPost = new Blog({ 
-      title, 
-      content, 
-      author, 
-      tags, 
-      dateOfBlogPosted, 
-      featuredBlog, 
-      image: fileData,
-      relevantarticle
+    const newBlogPost = new Blog({
+      HeroImg,
+      Category,
+      Tags: Tags.split(","),
+      Title,
+      Subtitle,
+      Content: JSON.parse(Content),
+      FAQs: JSON.parse(FAQs),
+      Date,
+      Author,
     });
+
     const savedBlogPost = await newBlogPost.save();
     res.status(201).json(savedBlogPost);
   } catch (error) {
@@ -53,58 +103,44 @@ exports.createBlogPost = async (req, res) => {
   }
 };
 
-// unction to get all blog posts
+// Function to get all blog posts
 exports.getAllBlogPosts = async (req, res) => {
   try {
-    // Parse query parameters
     const { sort, range, filter } = req.query;
-
-    // Define query conditions
     const conditions = {};
 
-    // Apply filter if provided
     if (filter) {
       Object.assign(conditions, JSON.parse(filter));
     }
 
-    // Define sorting options
     let sortOptions = {};
 
-    // Apply sorting if provided
     if (sort) {
       const [field, order] = JSON.parse(sort);
       sortOptions[field] = order === "ASC" ? 1 : -1;
     }
 
-    // Fetch total count of blog posts (for pagination)
     const totalCount = await Blog.countDocuments(conditions);
-
-    // Define pagination options
     let paginationOptions = {};
 
-    // Apply pagination if provided
     if (range) {
       const [start, end] = JSON.parse(range);
       paginationOptions.skip = start;
       paginationOptions.limit = end - start + 1;
     }
 
-    // Fetch blog posts based on query conditions, sorting, and pagination
     const blogPosts = await Blog.find(conditions)
       .sort(sortOptions)
       .skip(paginationOptions.skip)
       .limit(paginationOptions.limit);
 
-    // Calculate Content-Range header value
     const startRange = paginationOptions.skip;
     const endRange = startRange + blogPosts.length - 1;
     const contentRange = `posts ${startRange}-${endRange}/${totalCount}`;
 
-    // Set Content-Range header in the response
     res.setHeader("Content-Range", contentRange);
-    res.setHeader("Access-Control-Expose-Headers", "Content-Range"); // Expose Content-Range header to the client
+    res.setHeader("Access-Control-Expose-Headers", "Content-Range");
 
-    // Send response with filtered, sorted, and paginated blog posts
     res.status(200).json(blogPosts);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -115,7 +151,7 @@ exports.getAllBlogPosts = async (req, res) => {
 exports.getBlogPostById = async (req, res) => {
   try {
     const blogPost = await Blog.findById(req.params.id).populate(
-      "author",
+      "Author",
       "name email"
     );
     if (!blogPost) {
@@ -130,32 +166,37 @@ exports.getBlogPostById = async (req, res) => {
 // Controller function to update a blog post by ID
 exports.updateBlogPostById = async (req, res) => {
   try {
-    const { title, content, author, tags, dateOfBlogPosted, featuredBlog, image, relevantarticle } = req.body;
-    
-    // Check if the ID parameter is valid
+    const {
+      HeroImg,
+      Category,
+      Tags,
+      Title,
+      Subtitle,
+      Content,
+      FAQs,
+      Date,
+      Author,
+    } = req.body;
+
     if (!req.params.id) {
       return res.status(400).json({ message: "Invalid blog post ID" });
     }
 
-    // Find the blog post by ID and update it
     const updatedBlogPost = await Blog.findByIdAndUpdate(
       req.params.id,
-      { title, content, author, tags, dateOfBlogPosted, featuredBlog, image, relevantarticle },
+      { HeroImg, Category, Tags, Title, Subtitle, Content, FAQs, Date, Author },
       { new: true }
     );
 
-    // Check if the blog post was found and updated
     if (!updatedBlogPost) {
       return res.status(404).json({ message: "Blog post not found" });
     }
 
-    // Return the updated blog post
     res.status(200).json(updatedBlogPost);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
-
 
 // Controller function to delete a blog post by ID
 exports.deleteBlogPostById = async (req, res) => {
@@ -167,5 +208,20 @@ exports.deleteBlogPostById = async (req, res) => {
     res.status(200).json({ message: "Blog post deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+// Controller function to delete all blog posts
+exports.deleteAllBlogPosts = async (req, res) => {
+  try {
+    // Delete all blog posts
+    const result = await Blog.deleteMany({});
+
+    // Return a success message with the number of deleted documents
+    res.status(200).json({
+      message: `Successfully deleted ${result.deletedCount} blog posts.`,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error." });
   }
 };
