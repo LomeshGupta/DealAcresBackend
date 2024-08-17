@@ -11,7 +11,7 @@ const uploads = multer({ storage: storage });
 // router.use(authMiddleware);
 
 // Create a new blog post with a Hero Image
-router.post("/", upload.single("HeroImg"), blogController.createBlogPost);
+router.post("/", blogController.createBlogPost);
 
 // Get all blog posts
 router.get("/", blogController.getAllBlogPosts);
