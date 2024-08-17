@@ -74,8 +74,8 @@ exports.createBlogPost = async (req, res) => {
       Tags: Array.isArray(Tags) ? Tags : Tags.split(","),
       Title,
       Subtitle,
-      Content: Content ? JSON.parse(Content) : [],
-      FAQs: FAQs ? JSON.parse(FAQs) : [],
+      Content: Array.isArray(Content) ? Content : JSON.parse(Content),
+      FAQs: Array.isArray(FAQs) ? FAQs : JSON.parse(FAQs),
       Date,
       Author,
     });
