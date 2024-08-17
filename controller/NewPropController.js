@@ -51,11 +51,70 @@ const parseNestedStructure = (data) => {
 // Create a new property
 exports.createProperty = async (req, res) => {
   try {
-    const newProperty = new NewProperty(req.body);
-    await newProperty.save();
-    res.status(201).json(newProperty);
+    const {
+      mainPic,
+      sidePics,
+      title,
+      address,
+      city,
+      pincode,
+      PropertyType,
+      Location,
+      sideTitle,
+      Description,
+      Status,
+      minprice,
+      maxprice,
+      overview,
+      Parking,
+      virtualTour,
+      bathroomInfo,
+      bedroomInfo,
+      roomInfo,
+      interiorFeatures,
+      Amenities,
+      latitude,
+      longitude,
+      aboutDeveloper,
+      localityOverview,
+      FaqData,
+    } = req.body;
+
+    const newProperty = new Property({
+      mainPic,
+      sidePics,
+      title,
+      address,
+      city,
+      pincode,
+      PropertyType,
+      Location,
+      sideTitle,
+      Description,
+      Status,
+      minprice,
+      maxprice,
+      overview,
+      Parking,
+      virtualTour,
+      bathroomInfo,
+      bedroomInfo,
+      roomInfo,
+      interiorFeatures,
+      Amenities,
+      latitude,
+      longitude,
+      aboutDeveloper,
+      localityOverview,
+      FaqData,
+    });
+
+    const savedProperty = await newProperty.save();
+    res.status(201).json(savedProperty);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res
+      .status(500)
+      .json({ message: "Error creating property", error: error.message });
   }
 };
 
