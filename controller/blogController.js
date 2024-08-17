@@ -52,7 +52,6 @@ exports.uploadExcelFile = async (req, res) => {
 
 // Controller function to create a new blog post
 exports.createBlogPost = async (req, res) => {
-  let fileData = [];
   try {
     const {
       HeroImg,
@@ -60,28 +59,11 @@ exports.createBlogPost = async (req, res) => {
       Tags,
       Title,
       Subtitle,
-      Content,
-      FAQs,
+      Content, // Assuming this is already an array or object
+      FAQs, // Assuming this is already an array or object
       Date,
       Author,
     } = req.body;
-
-    // Upload HeroImg to Cloudinary
-    // if (req.file) {
-    //   try {
-    //     const uploadedFile = await cloudinary.uploader.upload(req.file.path, {
-    //       folder: "blogs_dealacres",
-    //       public_id: `${Date.now()}-${req.file.originalname}`,
-    //       resource_type: "image",
-    //     });
-    //     HeroImg = uploadedFile.secure_url;
-    //   } catch (uploadError) {
-    //     console.error("Cloudinary upload error:", uploadError);
-    //     return res
-    //       .status(500)
-    //       .json({ message: "Error uploading image to Cloudinary." });
-    //   }
-    // }
 
     const newBlogPost = new Blog({
       HeroImg,
@@ -89,8 +71,8 @@ exports.createBlogPost = async (req, res) => {
       Tags: Tags.split(","),
       Title,
       Subtitle,
-      Content: JSON.parse(Content),
-      FAQs: JSON.parse(FAQs),
+      Content, // No need to parse if already an array/object
+      FAQs, // No need to parse if already an array/object
       Date,
       Author,
     });
