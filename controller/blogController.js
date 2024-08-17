@@ -59,20 +59,23 @@ exports.createBlogPost = async (req, res) => {
       Tags,
       Title,
       Subtitle,
-      Content, // Assuming this is already an array or object
-      FAQs, // Assuming this is already an array or object
+      Content,
+      FAQs,
       Date,
       Author,
     } = req.body;
 
+    // Log the incoming data to debug
+    console.log("Request Data:", req.body);
+
     const newBlogPost = new Blog({
       HeroImg,
       Category,
-      Tags: Tags.split(","),
+      Tags: Array.isArray(Tags) ? Tags : Tags.split(","),
       Title,
       Subtitle,
-      Content, // No need to parse if already an array/object
-      FAQs, // No need to parse if already an array/object
+      Content: Content ? JSON.parse(Content) : [],
+      FAQs: FAQs ? JSON.parse(FAQs) : [],
       Date,
       Author,
     });
@@ -81,7 +84,9 @@ exports.createBlogPost = async (req, res) => {
     res.status(201).json(savedBlogPost);
   } catch (error) {
     console.error("Internal server error:", error);
-    res.status(500).json({ message: "Internal server error." });
+    res
+      .status(500)
+      .json({ message: error.message || "Internal server error." });
   }
 };
 
