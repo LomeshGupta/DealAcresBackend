@@ -28,15 +28,7 @@ const newPropertySchema = new Schema({
   virtualTour: [{ type: String }],
   bathroomInfo: [{ type: String }],
   bedroomInfo: [{ type: String }],
-  roomInfo: [
-    {
-      RoomType: { type: String },
-      RoomLevel: { type: String },
-      RoomWidth: { type: Number },
-      RoomLength: { type: Number },
-      RoomFlooring: { type: String },
-    },
-  ],
+  roomInfo: [{ type: String }],
   addRoomInfo: [{ type: String }],
   interiorFeatures: [{ type: String }],
   Amenities: [{ type: String }],
