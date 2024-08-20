@@ -31,7 +31,7 @@ const newPropertySchema = new Schema({
   roomInfo: [{ type: String }],
   addRoomInfo: [{ type: String }],
   interiorFeatures: [{ type: String }],
-  Amenities: [{ type: String }],
+  Amenities: [{ type: Number }],
   latitude: { type: String },
   longitude: { type: String },
   aboutDeveloper: {
