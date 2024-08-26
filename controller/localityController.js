@@ -1,115 +1,104 @@
-const Locality = require("../models/localityModel");
-const { fileSizeFormatter } = require("../utils/fileUpload");
-const cloudinary = require("cloudinary").v2;
+const Locality = require("../models/Locality");
+const XLSX = require("xlsx");
 
-cloudinary.config({
-  cloud_name: "dmen2qi7t",
-  api_key: "426686656792964",
-  api_secret: "xTxrl7ezipvf-fuWZ-Gm33wDvL0",
-});
-
-// Controller functions
-const createLocality = async (req, res) => {
+// Create a new locality
+exports.createLocality = async (req, res) => {
   try {
-    for (const file of req.files) {
-      try {
-        const uploadedFile = await cloudinary.uploader.upload(file.path, {
-          folder: "locality_dealacres",
-          public_id: `${Date.now()}-${file.originalname}`,
-          resource_type: "auto",
-        });
-        fileData.push({
-          fileName: file.originalname,
-          filePath: uploadedFile.secure_url,
-          fileId: uploadedFile.public_id,
-          fileType: file.mimetype,
-          fileSize: fileSizeFormatter(file.size, 2),
-        });
-      } catch (uploadError) {
-        // Handle Cloudinary upload error
-        console.error("Cloudinary upload error:", uploadError);
-        return res
-          .status(500)
-          .json({ message: "Error uploading file to Cloudinary." });
-      }
-    }
     const locality = new Locality(req.body);
-    await locality.save();
-    res.status(201).send(locality);
+    const savedLocality = await locality.save();
+    res.status(201).json(savedLocality);
   } catch (error) {
-    res.status(400).send(error);
+    res.status(400).json({ message: error.message });
   }
 };
 
-const getAllLocalities = async (req, res) => {
+// Get all localities
+exports.getAllLocalities = async (req, res) => {
   try {
-    const localities = await Locality.find({});
-    res.send(localities);
+    const localities = await Locality.find();
+    res.status(200).json(localities);
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).json({ message: error.message });
   }
 };
 
-const getLocalityById = async (req, res) => {
+// Get a single locality by ID
+exports.getLocalityById = async (req, res) => {
   try {
     const locality = await Locality.findById(req.params.id);
     if (!locality) {
-      return res.status(404).send();
+      return res.status(404).json({ message: "Locality not found" });
     }
-    res.send(locality);
+    res.status(200).json(locality);
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).json({ message: error.message });
   }
 };
 
-const updateLocalityById = async (req, res) => {
-  const updates = Object.keys(req.body);
-  const allowedUpdates = [
-    "state",
-    "city",
-    "zipCode",
-    "population",
-    "area",
-    "landmarks",
-  ];
-  const isValidOperation = updates.every((update) =>
-    allowedUpdates.includes(update)
-  );
-
-  if (!isValidOperation) {
-    return res.status(400).send({ error: "Invalid updates!" });
-  }
-
+// Update a locality by ID
+exports.updateLocality = async (req, res) => {
   try {
     const locality = await Locality.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
-      runValidators: true,
     });
     if (!locality) {
-      return res.status(404).send();
+      return res.status(404).json({ message: "Locality not found" });
     }
-    res.send(locality);
+    res.status(200).json(locality);
   } catch (error) {
-    res.status(400).send(error);
+    res.status(400).json({ message: error.message });
   }
 };
 
-const deleteLocalityById = async (req, res) => {
+// Delete a locality by ID
+exports.deleteLocality = async (req, res) => {
   try {
     const locality = await Locality.findByIdAndDelete(req.params.id);
     if (!locality) {
-      return res.status(404).send();
+      return res.status(404).json({ message: "Locality not found" });
     }
-    res.send(locality);
+    res.status(200).json({ message: "Locality deleted successfully" });
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).json({ message: error.message });
   }
 };
 
-module.exports = {
-  createLocality,
-  getAllLocalities,
-  getLocalityById,
-  updateLocalityById,
-  deleteLocalityById,
+// Upload localities via Excel file with memory storage
+exports.uploadLocalities = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    // Read the Excel file from memory buffer
+    const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+    const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    // Map rows to the locality fields
+    const localities = sheetData.map((row) => ({
+      name: row["Name"],
+      city: row["City"],
+      state: row["State"],
+      country: row["Country"],
+      pincode: row["Pincode"],
+      latitude: row["Latitude"],
+      longitude: row["Longitude"],
+      description: row["Description"],
+      type: row["Type"],
+      landmark: row["Landmark"],
+      population_density: row["Population Density"],
+      average_property_price: row["Average Property Price"],
+      amenities: row["Amenities"],
+    }));
+
+    // Save all localities to the database
+    const savedLocalities = await Locality.insertMany(localities);
+    res.status(201).json({
+      message: "Localities uploaded successfully",
+      savedLocalities,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
