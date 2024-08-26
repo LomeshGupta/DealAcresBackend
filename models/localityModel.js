@@ -44,10 +44,7 @@ const LocalitySchema = new mongoose.Schema({
   average_property_price: {
     type: Number,
   },
-  amenities: {
-    type: Number,
-    of: String,
-  },
+  Amenities: [{ type: Number }],
   created_at: {
     type: Date,
     default: Date.now,
