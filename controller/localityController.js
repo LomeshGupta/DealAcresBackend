@@ -1,4 +1,4 @@
-const Locality = require("../models/Locality");
+const Locality = require("../models/localityModel");
 const XLSX = require("xlsx");
 
 // Create a new locality

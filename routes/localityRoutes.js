@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const localityController = require("../controllers/localityController");
+const localityController = require("../controller/localityController");
 const multer = require("multer");
 
 const storage = multer.memoryStorage();
