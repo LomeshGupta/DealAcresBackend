@@ -44,7 +44,7 @@ const LocalitySchema = new mongoose.Schema({
   average_property_price: {
     type: Number,
   },
-  Amenities: [{ type: Number }],
+  amenities: [{ type: Number }],
   created_at: {
     type: Date,
     default: Date.now,
@@ -53,6 +53,27 @@ const LocalitySchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  hero_img: {
+    type: String,
+  },
+  side_img: [{ type: String }],
+  neighborhood: [{}],
+  pros: {
+    type: [String],
+  },
+  cons: {
+    type: [String],
+  },
+  faqs: [
+    {
+      Q: {
+        type: String,
+      },
+      A: {
+        type: String,
+      },
+    },
+  ],
 });
 
 LocalitySchema.pre("save", function (next) {

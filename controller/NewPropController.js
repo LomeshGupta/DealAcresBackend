@@ -3,8 +3,184 @@ const { ValidationError, CastError } = require("mongoose").Error;
 const router = express.Router();
 const xlsx = require("xlsx");
 const NewProperty = require("../models/newPropertyModel");
+const cloudinary = require("cloudinary").v2;
+const multer = require("multer");
+const { ValidationError, CastError } = require("mongoose"); // Ensure you have these imported
 
-// Helper function to parse nested structures
+// Cloudinary configuration
+cloudinary.config({
+  cloud_name: "dmen2qi7t",
+  api_key: "426686656792964",
+  api_secret: "xTxrl7ezipvf-fuWZ-Gm33wDvL0",
+});
+
+// Multer configuration for file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+exports.createProperty = [
+  // Multer middleware for handling file uploads
+  upload.fields([
+    { name: "mainPic", maxCount: 1 },
+    { name: "sidePics", maxCount: 10 },
+  ]),
+
+  async (req, res) => {
+    try {
+      const {
+        title,
+        address,
+        city,
+        pincode,
+        PropertyType,
+        Location,
+        sideTitle,
+        Description,
+        Status,
+        minprice,
+        maxprice,
+        overview,
+        Parking,
+        bathroomInfo,
+        bedroomInfo,
+        roomInfo,
+        interiorFeatures,
+        Amenities,
+        latitude,
+        longitude,
+        aboutDeveloper,
+        localityOverview,
+        FaqData,
+      } = req.body;
+
+      // Upload mainPic to Cloudinary
+      let mainPicUrl = "";
+      if (req.files["mainPic"]) {
+        const mainPicResult = await cloudinary.uploader
+          .upload_stream({ resource_type: "image" }, (error, result) => {
+            if (error) {
+              throw new Error("Cloudinary Upload Error: " + error.message);
+            }
+            mainPicUrl = result.secure_url;
+          })
+          .end(req.files["mainPic"][0].buffer);
+      }
+
+      // Upload sidePics to Cloudinary
+      const sidePicsUrls = [];
+      if (req.files["sidePics"]) {
+        for (const file of req.files["sidePics"]) {
+          const sidePicResult = await cloudinary.uploader
+            .upload_stream({ resource_type: "image" }, (error, result) => {
+              if (error) {
+                throw new Error("Cloudinary Upload Error: " + error.message);
+              }
+              sidePicsUrls.push(result.secure_url);
+            })
+            .end(file.buffer);
+        }
+      }
+
+      const newProperty = new NewProperty({
+        mainPic: mainPicUrl,
+        sidePics: sidePicsUrls,
+        title,
+        address,
+        city,
+        pincode,
+        PropertyType,
+        Location,
+        sideTitle,
+        Description,
+        Status,
+        minprice,
+        maxprice,
+        overview: {
+          projectArea: overview.projectArea,
+          launchDate: overview.launchDate,
+          configuration: overview.configuration,
+          sizes: overview.sizes,
+          avgPrice: overview.avgPrice,
+          projectSize: overview.projectSize,
+          possessionStatus: overview.possessionStatus,
+        },
+        Parking,
+        virtualTour: Array.isArray(req.body.virtualTour)
+          ? req.body.virtualTour
+          : JSON.parse(req.body.virtualTour),
+        bathroomInfo: Array.isArray(req.body.bathroomInfo)
+          ? req.body.bathroomInfo
+          : JSON.parse(req.body.bathroomInfo),
+        bedroomInfo: Array.isArray(req.body.bedroomInfo)
+          ? req.body.bedroomInfo
+          : JSON.parse(req.body.bedroomInfo),
+        roomInfo: Array.isArray(req.body.roomInfo)
+          ? req.body.roomInfo
+          : JSON.parse(req.body.roomInfo),
+        interiorFeatures: Array.isArray(req.body.interiorFeatures)
+          ? req.body.interiorFeatures
+          : JSON.parse(req.body.interiorFeatures),
+        Amenities: Array.isArray(req.body.Amenities)
+          ? req.body.Amenities
+          : JSON.parse(req.body.Amenities),
+        latitude,
+        longitude,
+        aboutDeveloper: {
+          DevId: aboutDeveloper.DevId,
+          logoSrc: aboutDeveloper.logoSrc,
+          developerInfo: aboutDeveloper.developerInfo,
+        },
+        localityOverview: {
+          LocId: localityOverview.LocId,
+          LocaTitle: localityOverview.LocaTitle,
+          LocDescription: localityOverview.LocDescription,
+          LocPros: Array.isArray(localityOverview.LocPros)
+            ? localityOverview.LocPros
+            : JSON.parse(localityOverview.LocPros),
+          LocCons: Array.isArray(localityOverview.LocCons)
+            ? localityOverview.LocCons
+            : JSON.parse(localityOverview.LocCons),
+        },
+        FaqData: Array.isArray(FaqData) ? FaqData : JSON.parse(FaqData),
+      });
+
+      const savedProperty = await newProperty.save();
+      res.status(201).json(savedProperty);
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        return res.status(400).json({
+          message: "Validation Error",
+          details: error.errors,
+        });
+      } else if (error instanceof CastError) {
+        return res.status(400).json({
+          message: "Invalid data type encountered",
+          details: error.message,
+        });
+      } else if (
+        error instanceof SyntaxError &&
+        error.message.includes("JSON")
+      ) {
+        return res.status(400).json({
+          message: "JSON Syntax Error",
+          details: error.message,
+        });
+      } else if (error.name === "MongoError" && error.code === 11000) {
+        return res.status(409).json({
+          message: "Duplicate Key Error",
+          details: error.keyValue,
+        });
+      } else {
+        console.error("Unexpected Error:", error);
+        return res.status(500).json({
+          message: "Internal Server Error",
+          details: error.message,
+        });
+      }
+    }
+  },
+];
+
 // Helper function to parse nested structures
 const parseNestedStructure = (data) => {
   const cleanString = (str) => {
@@ -47,130 +223,6 @@ const parseNestedStructure = (data) => {
   }
 
   return data;
-};
-
-// Create a new property
-exports.createProperty = async (req, res) => {
-  try {
-    const {
-      mainPic,
-      sidePics,
-      title,
-      address,
-      city,
-      pincode,
-      PropertyType,
-      Location,
-      sideTitle,
-      Description,
-      Status,
-      minprice,
-      maxprice,
-      overview,
-      Parking,
-      virtualTour,
-      bathroomInfo,
-      bedroomInfo,
-      roomInfo,
-      interiorFeatures,
-      Amenities,
-      latitude,
-      longitude,
-      aboutDeveloper,
-      localityOverview,
-      FaqData,
-    } = req.body;
-
-    const newProperty = new NewProperty({
-      mainPic,
-      sidePics: Array.isArray(sidePics) ? sidePics : JSON.parse(sidePics),
-      title,
-      address,
-      city,
-      pincode,
-      PropertyType,
-      Location,
-      sideTitle,
-      Description,
-      Status,
-      minprice,
-      maxprice,
-      overview: {
-        projectArea: overview.projectArea,
-        launchDate: overview.launchDate,
-        configuration: overview.configuration,
-        sizes: overview.sizes,
-        avgPrice: overview.avgPrice,
-        projectSize: overview.projectSize,
-        possessionStatus: overview.possessionStatus,
-      },
-      Parking,
-      virtualTour: Array.isArray(virtualTour)
-        ? virtualTour
-        : JSON.parse(virtualTour),
-      bathroomInfo: Array.isArray(bathroomInfo)
-        ? bathroomInfo
-        : JSON.parse(bathroomInfo),
-      bedroomInfo: Array.isArray(bedroomInfo)
-        ? bedroomInfo
-        : JSON.parse(bedroomInfo),
-      roomInfo: Array.isArray(roomInfo) ? roomInfo : JSON.parse(roomInfo),
-      interiorFeatures: Array.isArray(interiorFeatures)
-        ? interiorFeatures
-        : JSON.parse(interiorFeatures),
-      Amenities: Array.isArray(Amenities) ? Amenities : JSON.parse(Amenities),
-      latitude,
-      longitude,
-      aboutDeveloper: {
-        DevId: aboutDeveloper.DevId,
-        logoSrc: aboutDeveloper.logoSrc,
-        developerInfo: aboutDeveloper.developerInfo,
-      },
-      localityOverview: {
-        LocId: localityOverview.LocId,
-        LocaTitle: localityOverview.LocaTitle,
-        LocDescription: localityOverview.LocDescription,
-        LocPros: Array.isArray(localityOverview.LocPros)
-          ? localityOverview.LocPros
-          : JSON.parse(localityOverview.LocPros),
-        LocCons: Array.isArray(localityOverview.LocCons)
-          ? localityOverview.LocCons
-          : JSON.parse(localityOverview.LocCons),
-      },
-      FaqData: Array.isArray(FaqData) ? FaqData : JSON.parse(FaqData),
-    });
-
-    const savedProperty = await newProperty.save();
-    res.status(201).json(savedProperty);
-  } catch (error) {
-    if (error instanceof ValidationError) {
-      return res.status(400).json({
-        message: "Validation Error",
-        details: error.errors,
-      });
-    } else if (error instanceof CastError) {
-      return res.status(400).json({
-        message: "Invalid data type encountered",
-        details: error.message,
-      });
-    } else if (error instanceof SyntaxError && error.message.includes("JSON")) {
-      return res.status(400).json({
-        message: "JSON Syntax Error",
-        details: error.message,
-      });
-    } else if (error.name === "MongoError" && error.code === 11000) {
-      return res.status(409).json({
-        message: "Duplicate Key Error",
-        details: error.keyValue,
-      });
-    } else {
-      console.error("Unexpected Error:", error);
-      return res.status(500).json({
-        message: "Internal Server Error",
-        details: error.message,
-      });
-    }
-  }
 };
 
 // Get all properties with optional filtering by status and type
