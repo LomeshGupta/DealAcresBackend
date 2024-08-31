@@ -10,46 +10,6 @@ cloudinary.config({
   api_secret: "xTxrl7ezipvf-fuWZ-Gm33wDvL0",
 });
 
-exports.uploadExcelFile = async (req, res) => {
-  try {
-    // Check if an Excel file is provided
-    if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded" });
-    }
-
-    // Parse the Excel file
-    const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-    const jsonData = xlsx.utils.sheet_to_json(worksheet);
-
-    // Process each row in the Excel file
-    const blogPosts = jsonData.map((row) => ({
-      HeroImg: row.HeroImg,
-      Category: row.Category,
-      Tags: row.Tags ? row.Tags.split(",") : [],
-      Title: row.Title,
-      Subtitle: row.Subtitle,
-      Content: row.Content ? JSON.parse(row.Content) : [],
-      FAQs: row.FAQs ? JSON.parse(row.FAQs) : [],
-      Date: row.Date || Date.now(),
-      Author: row.Author,
-    }));
-
-    // Save blog posts to the database
-    const savedBlogPosts = await Blog.insertMany(blogPosts);
-
-    // Delete the uploaded Excel file after processing
-    fs.unlinkSync(req.file.path);
-
-    // Respond with the saved blog posts
-    res.status(201).json(savedBlogPosts);
-  } catch (error) {
-    console.error("Error processing Excel file:", error);
-    res.status(500).json({ message: "Internal server error." });
-  }
-};
-
 // Controller function to create a new blog post
 exports.createBlogPost = async (req, res) => {
   try {
@@ -87,6 +47,46 @@ exports.createBlogPost = async (req, res) => {
     res
       .status(500)
       .json({ message: error.message || "Internal server error." });
+  }
+};
+
+exports.uploadExcelFile = async (req, res) => {
+  try {
+    // Check if an Excel file is provided
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    // Parse the Excel file
+    const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const jsonData = xlsx.utils.sheet_to_json(worksheet);
+
+    // Process each row in the Excel file
+    const blogPosts = jsonData.map((row) => ({
+      HeroImg: row.HeroImg,
+      Category: row.Category,
+      Tags: row.Tags ? row.Tags.split(",") : [],
+      Title: row.Title,
+      Subtitle: row.Subtitle,
+      Content: row.Content ? JSON.parse(row.Content) : [],
+      FAQs: row.FAQs ? JSON.parse(row.FAQs) : [],
+      Date: row.Date || Date.now(),
+      Author: row.Author,
+    }));
+
+    // Save blog posts to the database
+    const savedBlogPosts = await Blog.insertMany(blogPosts);
+
+    // Delete the uploaded Excel file after processing
+    fs.unlinkSync(req.file.path);
+
+    // Respond with the saved blog posts
+    res.status(201).json(savedBlogPosts);
+  } catch (error) {
+    console.error("Error processing Excel file:", error);
+    res.status(500).json({ message: "Internal server error." });
   }
 };
 
