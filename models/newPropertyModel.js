@@ -14,8 +14,8 @@ const newPropertySchema = new Schema({
   sideTitle: { type: String },
   Description: { type: String },
   Status: { type: String },
-  minprice: { type: Number },
-  maxprice: { type: Number },
+  minprice: { type: String },
+  maxprice: { type: String },
   overview: {
     projectArea: { type: String },
     launchDate: { type: String },
