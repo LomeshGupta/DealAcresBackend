@@ -5,7 +5,6 @@ const xlsx = require("xlsx");
 const NewProperty = require("../models/newPropertyModel");
 const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
-const { ValidationError, CastError } = require("mongoose"); // Ensure you have these imported
 
 // Cloudinary configuration
 cloudinary.config({
