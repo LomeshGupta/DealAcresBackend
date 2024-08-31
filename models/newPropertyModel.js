@@ -7,6 +7,7 @@ const newPropertySchema = new Schema({
   title: { type: String },
   address: { type: String },
   city: { type: String },
+  state: { type: String },
   pincode: { type: String },
   PropertyType: [{ type: String }],
   Location: { type: String },

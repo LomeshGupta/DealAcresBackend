@@ -31,6 +31,7 @@ exports.createProperty = [
         title,
         address,
         city,
+        state,
         pincode,
         PropertyType,
         Location,
@@ -87,6 +88,7 @@ exports.createProperty = [
         title,
         address,
         city,
+        state,
         pincode,
         PropertyType: Array.isArray(PropertyType)
           ? PropertyType
