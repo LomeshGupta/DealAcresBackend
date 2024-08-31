@@ -88,7 +88,9 @@ exports.createProperty = [
         address,
         city,
         pincode,
-        PropertyType,
+        PropertyType: Array.isArray(PropertyType)
+          ? PropertyType
+          : PropertyType.split(","),
         Location,
         sideTitle,
         Description,
