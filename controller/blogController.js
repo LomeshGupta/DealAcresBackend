@@ -28,13 +28,33 @@ exports.createBlogPost = async (req, res) => {
     // Log the incoming data to debug
     console.log("Request Data:", req.body);
 
+    // Function to upload image to Cloudinary and return the URL
+    const uploadImage = async (imagePath) => {
+      const result = await cloudinary.uploader.upload(imagePath);
+      return result.secure_url;
+    };
+
+    // Upload Hero Image
+    const heroImageUrl = await uploadImage(HeroImg);
+
+    // Upload images in Content array
+    const contentWithUploadedImages = await Promise.all(
+      Content.map(async (contentItem) => {
+        if (contentItem.img) {
+          const imageUrl = await uploadImage(contentItem.img);
+          return { ...contentItem, img: imageUrl };
+        }
+        return contentItem;
+      })
+    );
+
     const newBlogPost = new Blog({
-      HeroImg,
+      HeroImg: heroImageUrl,
       Category,
       Tags: Array.isArray(Tags) ? Tags : Tags.split(","),
       Title,
       Subtitle,
-      Content: Array.isArray(Content) ? Content : JSON.parse(Content),
+      Content: contentWithUploadedImages,
       FAQs: Array.isArray(FAQs) ? FAQs : JSON.parse(FAQs),
       Date,
       Author,
