@@ -189,7 +189,7 @@ exports.getBlogPostById = async (req, res) => {
 // Controller function to update a blog post by ID
 exports.updateBlogPostById = async (req, res) => {
   try {
-    const { id } = req.params; // Assuming the blog post ID is passed as a URL parameter
+    const { id } = req.params;
     const {
       HeroImg,
       Category,
@@ -257,6 +257,12 @@ exports.updateBlogPostById = async (req, res) => {
     blogPost.Author = Author || blogPost.Author;
 
     const updatedBlogPost = await blogPost.save();
+
+    // Set CORS headers manually
+    res.header("Access-Control-Allow-Origin", "*"); // Allow all origins or specify origin
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+    res.header("Access-Control-Allow-Headers", "Content-Type");
+
     res.status(200).json(updatedBlogPost);
   } catch (error) {
     console.error("Internal server error:", error);

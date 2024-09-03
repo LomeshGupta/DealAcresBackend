@@ -30,7 +30,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(cors());
-app.use(express.json());
 
 //routesmiddleware
 app.use("/api/services", serviceRoute);
