@@ -204,6 +204,7 @@ exports.updateBlogPostById = async (req, res) => {
 
     // Log the incoming data to debug
     console.log("Request Data:", req.body);
+    console.log("Uploaded Files:", req.files);
 
     // Function to upload image to Cloudinary and return the URL
     const uploadImage = async (imagePath) => {
@@ -219,15 +220,21 @@ exports.updateBlogPostById = async (req, res) => {
 
     // Upload Hero Image if a new one is provided
     let heroImageUrl = blogPost.HeroImg;
-    if (HeroImg) {
-      heroImageUrl = await uploadImage(HeroImg);
+    if (req.files && req.files.find((file) => file.fieldname === "HeroImg")) {
+      const heroImageFile = req.files.find(
+        (file) => file.fieldname === "HeroImg"
+      );
+      heroImageUrl = await uploadImage(heroImageFile.path);
     }
 
     // Upload images in Content array if new ones are provided
     const contentWithUploadedImages = await Promise.all(
-      Content.map(async (contentItem, index) => {
-        if (contentItem.img) {
-          const imageUrl = await uploadImage(contentItem.img);
+      JSON.parse(Content).map(async (contentItem, index) => {
+        const contentImageFile = req.files.find(
+          (file) => file.fieldname === `Content[${index}].img`
+        );
+        if (contentImageFile) {
+          const imageUrl = await uploadImage(contentImageFile.path);
           return { ...contentItem, img: imageUrl };
         }
         // Retain the existing image URL if no new image is provided
@@ -259,7 +266,7 @@ exports.updateBlogPostById = async (req, res) => {
     const updatedBlogPost = await blogPost.save();
 
     // Set CORS headers manually
-    res.header("Access-Control-Allow-Origin", "*"); // Allow all origins or specify origin
+    res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
     res.header("Access-Control-Allow-Headers", "Content-Type");
 
