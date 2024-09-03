@@ -11,7 +11,7 @@ const uploads = multer({ storage: storage });
 // router.use(authMiddleware);
 
 // Create a new blog post with a Hero Image
-router.post("/", upload.array("image"), blogController.createBlogPost);
+router.post("/", blogController.createBlogPost);
 
 // Get all blog posts
 router.get("/", blogController.getAllBlogPosts);
@@ -20,7 +20,7 @@ router.get("/", blogController.getAllBlogPosts);
 router.get("/:id", blogController.getBlogPostById);
 
 // Update a blog post by ID, with the option to upload a new Hero Image
-router.put("/:id", upload.array("image"), blogController.updateBlogPostById);
+router.put("/:id", upload.single("HeroImg"), blogController.updateBlogPostById);
 
 // Delete a blog post by ID
 router.delete("/:id", blogController.deleteBlogPostById);

@@ -10,66 +10,6 @@ cloudinary.config({
   api_secret: "xTxrl7ezipvf-fuWZ-Gm33wDvL0",
 });
 
-// Controller function to create a new blog post
-exports.createBlogPost = async (req, res) => {
-  try {
-    const {
-      HeroImg,
-      Category,
-      Tags,
-      Title,
-      Subtitle,
-      Content,
-      FAQs,
-      Date,
-      Author,
-    } = req.body;
-
-    // Log the incoming data to debug
-    console.log("Request Data:", req.body);
-
-    // Function to upload image to Cloudinary and return the URL
-    const uploadImage = async (imagePath) => {
-      const result = await cloudinary.uploader.upload(imagePath);
-      return result.secure_url;
-    };
-
-    // Upload Hero Image
-    const heroImageUrl = await uploadImage(HeroImg);
-
-    // Upload images in Content array
-    const contentWithUploadedImages = await Promise.all(
-      Content.map(async (contentItem) => {
-        if (contentItem.img) {
-          const imageUrl = await uploadImage(contentItem.img);
-          return { ...contentItem, img: imageUrl };
-        }
-        return contentItem;
-      })
-    );
-
-    const newBlogPost = new Blog({
-      HeroImg: heroImageUrl,
-      Category,
-      Tags: Array.isArray(Tags) ? Tags : Tags.split(","),
-      Title,
-      Subtitle,
-      Content: contentWithUploadedImages,
-      FAQs: Array.isArray(FAQs) ? FAQs : JSON.parse(FAQs),
-      Date,
-      Author,
-    });
-
-    const savedBlogPost = await newBlogPost.save();
-    res.status(201).json(savedBlogPost);
-  } catch (error) {
-    console.error("Internal server error:", error);
-    res
-      .status(500)
-      .json({ message: error.message || "Internal server error." });
-  }
-};
-
 exports.uploadExcelFile = async (req, res) => {
   try {
     // Check if an Excel file is provided
@@ -107,6 +47,46 @@ exports.uploadExcelFile = async (req, res) => {
   } catch (error) {
     console.error("Error processing Excel file:", error);
     res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+// Controller function to create a new blog post
+exports.createBlogPost = async (req, res) => {
+  try {
+    const {
+      HeroImg,
+      Category,
+      Tags,
+      Title,
+      Subtitle,
+      Content,
+      FAQs,
+      Date,
+      Author,
+    } = req.body;
+
+    // Log the incoming data to debug
+    console.log("Request Data:", req.body);
+
+    const newBlogPost = new Blog({
+      HeroImg,
+      Category,
+      Tags: Array.isArray(Tags) ? Tags : Tags.split(","),
+      Title,
+      Subtitle,
+      Content: Array.isArray(Content) ? Content : JSON.parse(Content),
+      FAQs: Array.isArray(FAQs) ? FAQs : JSON.parse(FAQs),
+      Date,
+      Author,
+    });
+
+    const savedBlogPost = await newBlogPost.save();
+    res.status(201).json(savedBlogPost);
+  } catch (error) {
+    console.error("Internal server error:", error);
+    res
+      .status(500)
+      .json({ message: error.message || "Internal server error." });
   }
 };
 
@@ -189,7 +169,6 @@ exports.getBlogPostById = async (req, res) => {
 // Controller function to update a blog post by ID
 exports.updateBlogPostById = async (req, res) => {
   try {
-    const { id } = req.params;
     const {
       HeroImg,
       Category,
@@ -202,80 +181,23 @@ exports.updateBlogPostById = async (req, res) => {
       Author,
     } = req.body;
 
-    // Log the incoming data to debug
-    console.log("Request Data:", req.body);
-    console.log("Uploaded Files:", req.files);
+    if (!req.params.id) {
+      return res.status(400).json({ message: "Invalid blog post ID" });
+    }
 
-    // Function to upload image to Cloudinary and return the URL
-    const uploadImage = async (imagePath) => {
-      const result = await cloudinary.uploader.upload(imagePath);
-      return result.secure_url;
-    };
+    const updatedBlogPost = await Blog.findByIdAndUpdate(
+      req.params.id,
+      { HeroImg, Category, Tags, Title, Subtitle, Content, FAQs, Date, Author },
+      { new: true }
+    );
 
-    // Find the existing blog post by ID
-    const blogPost = await Blog.findById(id);
-    if (!blogPost) {
+    if (!updatedBlogPost) {
       return res.status(404).json({ message: "Blog post not found" });
     }
 
-    // Upload Hero Image if a new one is provided
-    let heroImageUrl = blogPost.HeroImg;
-    if (req.files && req.files.find((file) => file.fieldname === "HeroImg")) {
-      const heroImageFile = req.files.find(
-        (file) => file.fieldname === "HeroImg"
-      );
-      heroImageUrl = await uploadImage(heroImageFile.path);
-    }
-
-    // Upload images in Content array if new ones are provided
-    const contentWithUploadedImages = await Promise.all(
-      JSON.parse(Content).map(async (contentItem, index) => {
-        const contentImageFile = req.files.find(
-          (file) => file.fieldname === `Content[${index}].img`
-        );
-        if (contentImageFile) {
-          const imageUrl = await uploadImage(contentImageFile.path);
-          return { ...contentItem, img: imageUrl };
-        }
-        // Retain the existing image URL if no new image is provided
-        return contentItem.img ? contentItem : blogPost.Content[index];
-      })
-    );
-
-    // Update the blog post with new data
-    blogPost.HeroImg = heroImageUrl;
-    blogPost.Category = Category || blogPost.Category;
-    blogPost.Tags = Tags
-      ? Array.isArray(Tags)
-        ? Tags
-        : Tags.split(",")
-      : blogPost.Tags;
-    blogPost.Title = Title || blogPost.Title;
-    blogPost.Subtitle = Subtitle || blogPost.Subtitle;
-    blogPost.Content = contentWithUploadedImages.length
-      ? contentWithUploadedImages
-      : blogPost.Content;
-    blogPost.FAQs = FAQs
-      ? Array.isArray(FAQs)
-        ? FAQs
-        : JSON.parse(FAQs)
-      : blogPost.FAQs;
-    blogPost.Date = Date || blogPost.Date;
-    blogPost.Author = Author || blogPost.Author;
-
-    const updatedBlogPost = await blogPost.save();
-
-    // Set CORS headers manually
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-    res.header("Access-Control-Allow-Headers", "Content-Type");
-
     res.status(200).json(updatedBlogPost);
   } catch (error) {
-    console.error("Internal server error:", error);
-    res
-      .status(500)
-      .json({ message: error.message || "Internal server error." });
+    res.status(400).json({ message: error.message });
   }
 };
 
