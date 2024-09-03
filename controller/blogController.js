@@ -189,6 +189,7 @@ exports.getBlogPostById = async (req, res) => {
 // Controller function to update a blog post by ID
 exports.updateBlogPostById = async (req, res) => {
   try {
+    const { id } = req.params; // Assuming the blog post ID is passed as a URL parameter
     const {
       HeroImg,
       Category,
@@ -201,23 +202,67 @@ exports.updateBlogPostById = async (req, res) => {
       Author,
     } = req.body;
 
-    if (!req.params.id) {
-      return res.status(400).json({ message: "Invalid blog post ID" });
-    }
+    // Log the incoming data to debug
+    console.log("Request Data:", req.body);
 
-    const updatedBlogPost = await Blog.findByIdAndUpdate(
-      req.params.id,
-      { HeroImg, Category, Tags, Title, Subtitle, Content, FAQs, Date, Author },
-      { new: true }
-    );
+    // Function to upload image to Cloudinary and return the URL
+    const uploadImage = async (imagePath) => {
+      const result = await cloudinary.uploader.upload(imagePath);
+      return result.secure_url;
+    };
 
-    if (!updatedBlogPost) {
+    // Find the existing blog post by ID
+    const blogPost = await Blog.findById(id);
+    if (!blogPost) {
       return res.status(404).json({ message: "Blog post not found" });
     }
 
+    // Upload Hero Image if a new one is provided
+    let heroImageUrl = blogPost.HeroImg;
+    if (HeroImg) {
+      heroImageUrl = await uploadImage(HeroImg);
+    }
+
+    // Upload images in Content array if new ones are provided
+    const contentWithUploadedImages = await Promise.all(
+      Content.map(async (contentItem, index) => {
+        if (contentItem.img) {
+          const imageUrl = await uploadImage(contentItem.img);
+          return { ...contentItem, img: imageUrl };
+        }
+        // Retain the existing image URL if no new image is provided
+        return contentItem.img ? contentItem : blogPost.Content[index];
+      })
+    );
+
+    // Update the blog post with new data
+    blogPost.HeroImg = heroImageUrl;
+    blogPost.Category = Category || blogPost.Category;
+    blogPost.Tags = Tags
+      ? Array.isArray(Tags)
+        ? Tags
+        : Tags.split(",")
+      : blogPost.Tags;
+    blogPost.Title = Title || blogPost.Title;
+    blogPost.Subtitle = Subtitle || blogPost.Subtitle;
+    blogPost.Content = contentWithUploadedImages.length
+      ? contentWithUploadedImages
+      : blogPost.Content;
+    blogPost.FAQs = FAQs
+      ? Array.isArray(FAQs)
+        ? FAQs
+        : JSON.parse(FAQs)
+      : blogPost.FAQs;
+    blogPost.Date = Date || blogPost.Date;
+    blogPost.Author = Author || blogPost.Author;
+
+    const updatedBlogPost = await blogPost.save();
     res.status(200).json(updatedBlogPost);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error("Internal server error:", error);
+    res
+      .status(500)
+      .json({ message: error.message || "Internal server error." });
   }
 };
 
