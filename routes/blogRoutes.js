@@ -20,7 +20,12 @@ router.get("/", blogController.getAllBlogPosts);
 router.get("/:id", blogController.getBlogPostById);
 
 // Update a blog post by ID, with the option to upload a new Hero Image
-router.put("/:id", blogController.updateBlogPostById);
+router.put(
+  "/:id",
+  upload.single("HeroImg"),
+  upload.array(),
+  blogController.updateBlogPostById
+);
 
 // Delete a blog post by ID
 router.delete("/:id", blogController.deleteBlogPostById);
