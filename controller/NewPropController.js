@@ -45,6 +45,8 @@ exports.createProperty = [
         bedroomInfo,
         roomInfo,
         interiorFeatures,
+        exteriorFeatures,
+        otherFeatures,
         Amenities,
         latitude,
         longitude,
@@ -123,6 +125,12 @@ exports.createProperty = [
         interiorFeatures: Array.isArray(req.body.interiorFeatures)
           ? req.body.interiorFeatures
           : JSON.parse(req.body.interiorFeatures),
+        exteriorFeatures: Array.isArray(req.body.exteriorFeatures)
+          ? req.body.exteriorFeatures
+          : JSON.parse(req.body.exteriorFeatures),
+        otherFeatures: Array.isArray(req.body.otherFeatures)
+          ? req.body.otherFeatures
+          : JSON.parse(req.body.otherFeatures),
         Amenities: Array.isArray(req.body.Amenities)
           ? req.body.Amenities
           : JSON.parse(req.body.Amenities),
