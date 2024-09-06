@@ -27,62 +27,74 @@ exports.createProperty = [
   async (req, res) => {
     try {
       const {
-        title,
-        address,
-        city,
-        state,
-        pincode,
-        PropertyType,
-        Location,
-        sideTitle,
-        Description,
-        Status,
-        minprice,
-        maxprice,
-        overview,
-        Parking,
-        bathroomInfo,
-        bedroomInfo,
-        roomInfo,
-        interiorFeatures,
-        exteriorFeatures,
-        otherFeatures,
-        Amenities,
-        latitude,
-        longitude,
-        aboutDeveloper,
-        localityOverview,
-        FaqData,
+        title = "",
+        address = "",
+        city = "",
+        state = "",
+        pincode = "",
+        PropertyType = "",
+        Location = "",
+        sideTitle = "",
+        Description = "",
+        Status = "",
+        minprice = 0,
+        maxprice = 0,
+        overview = {},
+        Parking = "",
+        bathroomInfo = "[]",
+        bedroomInfo = "[]",
+        roomInfo = "[]",
+        interiorFeatures = "[]",
+        exteriorFeatures = "[]",
+        otherFeatures = "[]",
+        Amenities = "[]",
+        latitude = "",
+        longitude = "",
+        aboutDeveloper = "{}",
+        localityOverview = "{}",
+        FaqData = "[]",
       } = req.body;
 
-      // Upload mainPic to Cloudinary
-      let mainPicUrl = "";
-      if (req.files["mainPic"]) {
-        const mainPicResult = await cloudinary.uploader
-          .upload_stream({ resource_type: "image" }, (error, result) => {
-            if (error) {
-              throw new Error("Cloudinary Upload Error: " + error.message);
-            }
-            mainPicUrl = result.secure_url;
-          })
-          .end(req.files["mainPic"][0].buffer);
+      // Check if mainPic is uploaded
+      if (
+        !req.files ||
+        !req.files["mainPic"] ||
+        req.files["mainPic"].length === 0
+      ) {
+        return res.status(400).json({ message: "Main picture is required." });
       }
 
-      // Upload sidePics to Cloudinary
+      // Function to upload a single image to Cloudinary and return the URL
+      const uploadToCloudinary = (buffer) => {
+        return new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            { resource_type: "image" },
+            (error, result) => {
+              if (error) {
+                return reject("Cloudinary Upload Error: " + error.message);
+              }
+              resolve(result.secure_url);
+            }
+          );
+          uploadStream.end(buffer);
+        });
+      };
+
+      // Upload mainPic to Cloudinary
+      const mainPicUrl = await uploadToCloudinary(
+        req.files["mainPic"][0].buffer
+      );
+
+      // Upload sidePics to Cloudinary (if present)
       const sidePicsUrls = [];
       if (req.files["sidePics"]) {
         for (const file of req.files["sidePics"]) {
-          const sidePicResult = await cloudinary.uploader
-            .upload_stream({ resource_type: "image" }, (error, result) => {
-              if (error) {
-                throw new Error("Cloudinary Upload Error: " + error.message);
-              }
-              sidePicsUrls.push(result.secure_url);
-            })
-            .end(file.buffer);
+          const sidePicUrl = await uploadToCloudinary(file.buffer);
+          sidePicsUrls.push(sidePicUrl);
         }
       }
 
+      // Create a new property object
       const newProperty = new NewProperty({
         mainPic: mainPicUrl,
         sidePics: sidePicsUrls,
@@ -91,9 +103,7 @@ exports.createProperty = [
         city,
         state,
         pincode,
-        PropertyType: Array.isArray(PropertyType)
-          ? PropertyType
-          : PropertyType.split(","),
+        PropertyType: PropertyType.split(","),
         Location,
         sideTitle,
         Description,
@@ -101,60 +111,33 @@ exports.createProperty = [
         minprice,
         maxprice,
         overview: {
-          projectArea: overview.projectArea,
-          launchDate: overview.launchDate,
-          configuration: overview.configuration,
-          sizes: overview.sizes,
-          avgPrice: overview.avgPrice,
-          projectSize: overview.projectSize,
-          possessionStatus: overview.possessionStatus,
+          projectArea: overview.projectArea || "",
+          launchDate: overview.launchDate || "",
+          configuration: overview.configuration || "",
+          sizes: overview.sizes || "",
+          avgPrice: overview.avgPrice || "",
+          projectSize: overview.projectSize || "",
+          possessionStatus: overview.possessionStatus || "",
         },
         Parking,
-        virtualTour: Array.isArray(req.body.virtualTour)
-          ? req.body.virtualTour
-          : JSON.parse(req.body.virtualTour),
-        bathroomInfo: Array.isArray(req.body.bathroomInfo)
-          ? req.body.bathroomInfo
-          : JSON.parse(req.body.bathroomInfo),
-        bedroomInfo: Array.isArray(req.body.bedroomInfo)
-          ? req.body.bedroomInfo
-          : JSON.parse(req.body.bedroomInfo),
-        roomInfo: Array.isArray(req.body.roomInfo)
-          ? req.body.roomInfo
-          : JSON.parse(req.body.roomInfo),
-        interiorFeatures: Array.isArray(req.body.interiorFeatures)
-          ? req.body.interiorFeatures
-          : JSON.parse(req.body.interiorFeatures),
-        exteriorFeatures: Array.isArray(req.body.exteriorFeatures)
-          ? req.body.exteriorFeatures
-          : JSON.parse(req.body.exteriorFeatures),
-        otherFeatures: Array.isArray(req.body.otherFeatures)
-          ? req.body.otherFeatures
-          : JSON.parse(req.body.otherFeatures),
-        Amenities: Array.isArray(req.body.Amenities)
-          ? req.body.Amenities
-          : JSON.parse(req.body.Amenities),
+        virtualTour: req.body.virtualTour
+          ? JSON.parse(req.body.virtualTour)
+          : [],
+        bathroomInfo: JSON.parse(bathroomInfo),
+        bedroomInfo: JSON.parse(bedroomInfo),
+        roomInfo: JSON.parse(roomInfo),
+        interiorFeatures: JSON.parse(interiorFeatures),
+        exteriorFeatures: JSON.parse(exteriorFeatures),
+        otherFeatures: JSON.parse(otherFeatures),
+        Amenities: JSON.parse(Amenities),
         latitude,
         longitude,
-        aboutDeveloper: {
-          DevId: aboutDeveloper.DevId,
-          logoSrc: aboutDeveloper.logoSrc,
-          developerInfo: aboutDeveloper.developerInfo,
-        },
-        localityOverview: {
-          LocId: localityOverview.LocId,
-          LocaTitle: localityOverview.LocaTitle,
-          LocDescription: localityOverview.LocDescription,
-          LocPros: Array.isArray(localityOverview.LocPros)
-            ? localityOverview.LocPros
-            : JSON.parse(localityOverview.LocPros),
-          LocCons: Array.isArray(localityOverview.LocCons)
-            ? localityOverview.LocCons
-            : JSON.parse(localityOverview.LocCons),
-        },
-        FaqData: Array.isArray(FaqData) ? FaqData : JSON.parse(FaqData),
+        aboutDeveloper: JSON.parse(aboutDeveloper),
+        localityOverview: JSON.parse(localityOverview),
+        FaqData: JSON.parse(FaqData),
       });
 
+      // Save the new property to the database
       const savedProperty = await newProperty.save();
       res.status(201).json(savedProperty);
     } catch (error) {
