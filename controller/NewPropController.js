@@ -56,13 +56,13 @@ exports.createProperty = [
       } = req.body;
 
       // Check if mainPic is uploaded
-      if (
-        !req.files ||
-        !req.files["mainPic"] ||
-        req.files["mainPic"].length === 0
-      ) {
-        return res.status(400).json({ message: "Main picture is required." });
-      }
+      // if (
+      //   !req.files ||
+      //   !req.files["mainPic"] ||
+      //   req.files["mainPic"].length === 0
+      // ) {
+      //   return res.status(400).json({ message: "Main picture is required." });
+      // }
 
       // Function to upload a single image to Cloudinary and return the URL
       const uploadToCloudinary = (buffer) => {
@@ -110,15 +110,7 @@ exports.createProperty = [
         Status,
         minprice,
         maxprice,
-        overview: {
-          projectArea: overview.projectArea || "",
-          launchDate: overview.launchDate || "",
-          configuration: overview.configuration || "",
-          sizes: overview.sizes || "",
-          avgPrice: overview.avgPrice || "",
-          projectSize: overview.projectSize || "",
-          possessionStatus: overview.possessionStatus || "",
-        },
+        overview: req.body.overview ? JSON.parse(req.body.overview) : [],
         Parking,
         virtualTour: req.body.virtualTour
           ? JSON.parse(req.body.virtualTour)
