@@ -131,7 +131,7 @@ exports.createProperty = [
 
       // Save the new property to the database
       const savedProperty = await newProperty.save();
-      res.status(201).json(savedProperty);
+      res.status(200).json(savedProperty);
     } catch (error) {
       if (error instanceof ValidationError) {
         return res.status(400).json({

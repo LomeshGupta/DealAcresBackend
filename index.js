@@ -20,6 +20,11 @@ const ProjectRoute = require("./routes/ProjectRoute");
 const LocationRoute = require("./routes/LocationRoute");
 const PropSingle = require("./routes/propSingleRoute");
 const Guide = require("./routes/guideRoutes");
+const multer = require("multer");
+
+// Multer configuration for file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 const app = express();
 
@@ -30,6 +35,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(cors());
+app.use(upload.any());
 
 //routesmiddleware
 app.use("/api/services", serviceRoute);

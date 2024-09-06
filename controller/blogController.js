@@ -3,12 +3,18 @@ const { fileSizeFormatter } = require("../utils/fileUpload");
 const cloudinary = require("cloudinary").v2;
 const xlsx = require("xlsx");
 const fs = require("fs");
+const { error } = require("console");
+const multer = require("multer");
 
 cloudinary.config({
   cloud_name: "dmen2qi7t",
   api_key: "426686656792964",
   api_secret: "xTxrl7ezipvf-fuWZ-Gm33wDvL0",
 });
+
+// Multer configuration for file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 exports.uploadExcelFile = async (req, res) => {
   try {
@@ -168,14 +174,14 @@ exports.getBlogPostById = async (req, res) => {
 
 // Controller function to update a blog post by ID
 exports.updateBlogPostById = async (req, res) => {
+  upload.any;
   try {
     const {
-      HeroImg,
       Category,
       Tags,
       Title,
       Subtitle,
-      Content,
+      Content = [],
       FAQs,
       Date,
       Author,
@@ -185,9 +191,71 @@ exports.updateBlogPostById = async (req, res) => {
       return res.status(400).json({ message: "Invalid blog post ID" });
     }
 
+    console.log("Request body:", req.body);
+    console.log("Files:", req.files);
+
+    const uploadToCloudinary = (buffer) => {
+      return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { resource_type: "image" },
+          (error, result) => {
+            if (error) {
+              return reject("Cloudinary Upload Error: " + error.message);
+            }
+            resolve(result.secure_url);
+          }
+        );
+        uploadStream.end(buffer);
+      });
+    };
+
+    // let HeroImgUrl;
+    // Check if HeroImg is provided as a file for upload
+    // Upload mainPic to Cloudinary
+    const heroImgFile = req.files.find((file) => file.fieldname === "HeroImg");
+    const HeroImgUrl = await uploadToCloudinary(heroImgFile.buffer);
+
+    // Process images in the Content array (if any)
+    const updatedContent = await Promise.all(
+      Content.map(async (section, index) => {
+        console.log(section);
+
+        // Find the file associated with the current section
+        const contentImgFile = req.files.find(
+          (file) => file.fieldname === `Content[${index}][img]`
+        );
+
+        if (contentImgFile) {
+          // Upload each image in the Content section
+          const imgUrl = await uploadToCloudinary(contentImgFile.buffer);
+          section.img = imgUrl; // Update the img field with the Cloudinary URL
+        }
+
+        return section;
+      })
+    );
+
+    // Prepare the update data
+    const updatedData = {
+      Category,
+      Tags: Tags ? Tags.split(",") : [],
+      Title,
+      Subtitle,
+      Content: updatedContent,
+      FAQs: FAQs ? JSON.parse(FAQs) : [],
+      Date,
+      Author,
+    };
+
+    // If HeroImg was uploaded, include it in the update
+    if (HeroImgUrl) {
+      updatedData.HeroImg = HeroImgUrl;
+    }
+
+    // Find the blog post by ID and update it
     const updatedBlogPost = await Blog.findByIdAndUpdate(
       req.params.id,
-      { HeroImg, Category, Tags, Title, Subtitle, Content, FAQs, Date, Author },
+      updatedData,
       { new: true }
     );
 
@@ -197,6 +265,7 @@ exports.updateBlogPostById = async (req, res) => {
 
     res.status(200).json(updatedBlogPost);
   } catch (error) {
+    console.error("Error updating blog post:", error);
     res.status(400).json({ message: error.message });
   }
 };
