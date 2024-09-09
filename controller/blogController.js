@@ -174,7 +174,6 @@ exports.getBlogPostById = async (req, res) => {
 
 // Controller function to update a blog post by ID
 exports.updateBlogPostById = async (req, res) => {
-  upload.any;
   try {
     const {
       Category,
@@ -192,8 +191,9 @@ exports.updateBlogPostById = async (req, res) => {
     }
 
     console.log("Request body:", req.body);
-    console.log("Files:", req.files);
+    console.log("Files:", req.files); // Log to ensure files are being received
 
+    // Function to upload image buffer to Cloudinary
     const uploadToCloudinary = (buffer) => {
       return new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
@@ -209,24 +209,31 @@ exports.updateBlogPostById = async (req, res) => {
       });
     };
 
-    // let HeroImgUrl;
+    // Variable to hold the Hero Image URL (if uploaded)
+    let HeroImgUrl = null;
+
     // Check if HeroImg is provided as a file for upload
-    // Upload mainPic to Cloudinary
-    const heroImgFile = req.files.find((file) => file.fieldname === "HeroImg");
-    const HeroImgUrl = await uploadToCloudinary(heroImgFile.buffer);
+    const heroImgFile = req.files?.find((file) => file.fieldname === "HeroImg");
+
+    // Upload HeroImg to Cloudinary if it exists
+    if (heroImgFile) {
+      HeroImgUrl = await uploadToCloudinary(heroImgFile.buffer);
+    } else {
+      console.log("No HeroImg file found in the request");
+    }
 
     // Process images in the Content array (if any)
     const updatedContent = await Promise.all(
       Content.map(async (section, index) => {
-        console.log(section);
+        console.log("Content section:", section);
 
         // Find the file associated with the current section
-        const contentImgFile = req.files.find(
+        const contentImgFile = req.files?.find(
           (file) => file.fieldname === `Content[${index}][img]`
         );
 
+        // If there's an image, upload it to Cloudinary and update the section
         if (contentImgFile) {
-          // Upload each image in the Content section
           const imgUrl = await uploadToCloudinary(contentImgFile.buffer);
           section.img = imgUrl; // Update the img field with the Cloudinary URL
         }
@@ -235,7 +242,7 @@ exports.updateBlogPostById = async (req, res) => {
       })
     );
 
-    // Prepare the update data
+    // Prepare the data for updating the blog post
     const updatedData = {
       Category,
       Tags: Tags ? Tags.split(",") : [],
@@ -247,7 +254,7 @@ exports.updateBlogPostById = async (req, res) => {
       Author,
     };
 
-    // If HeroImg was uploaded, include it in the update
+    // Include HeroImg URL in update if it was uploaded
     if (HeroImgUrl) {
       updatedData.HeroImg = HeroImgUrl;
     }
