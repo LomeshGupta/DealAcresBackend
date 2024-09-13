@@ -13,6 +13,7 @@ const blogSchema = new mongoose.Schema({
       type: String,
     },
   ],
+  Manual: { type: String },
   Title: {
     type: String,
   },
