@@ -27,12 +27,7 @@ const blogSchema = new mongoose.Schema({
       img: { type: String },
     },
   ],
-  FAQs: [
-    {
-      Q: { type: String },
-      A: { type: String },
-    },
-  ],
+  FAQs: [],
   Date: {
     type: Date,
     default: Date.now,
