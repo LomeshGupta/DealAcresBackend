@@ -60,30 +60,53 @@ exports.uploadExcelFile = async (req, res) => {
 exports.createBlogPost = async (req, res) => {
   try {
     const {
-      HeroImg,
-      Category,
-      Tags,
-      Title,
-      Subtitle,
-      Manual,
-      Content,
-      FAQs,
-      Date,
-      Author,
+      HeroImg = "",
+      Category = "Uncategorized",
+      Tags = "",
+      Title = "Untitled",
+      Subtitle = "",
+      Manual = "",
+      Content = "[]",
+      FAQs = "[]",
+      Date = new Date(),
+      Author = "Anonymous",
     } = req.body;
 
-    // Log the incoming data to debug
-    // console.log("Request Data:", req.body);
+    // Ensure Tags is an array
+    const processedTags = Array.isArray(Tags)
+      ? Tags
+      : Tags.split(",").filter((tag) => tag.trim());
+
+    // Ensure Content and FAQs are arrays
+    const processedContent = Array.isArray(Content)
+      ? Content
+      : (() => {
+          try {
+            return JSON.parse(Content);
+          } catch {
+            return [];
+          }
+        })();
+
+    const processedFAQs = Array.isArray(FAQs)
+      ? FAQs
+      : (() => {
+          try {
+            return JSON.parse(FAQs);
+          } catch {
+            return [];
+          }
+        })();
 
     const newBlogPost = new Blog({
       HeroImg,
       Category,
-      Tags: Array.isArray(Tags) ? Tags : Tags.split(","),
+      Tags: processedTags,
       Title,
       Subtitle,
       Manual,
-      Content: Array.isArray(Content) ? Content : JSON.parse(Content),
-      FAQs: Array.isArray(FAQs) ? FAQs : JSON.parse(FAQs),
+      Content: processedContent,
+      FAQs: processedFAQs,
       Date,
       Author,
     });
