@@ -20,6 +20,7 @@ const ProjectRoute = require("./routes/ProjectRoute");
 const LocationRoute = require("./routes/LocationRoute");
 const PropSingle = require("./routes/propSingleRoute");
 const Guide = require("./routes/guideRoutes");
+const Otp = require("./routes/otpRoute");
 const multer = require("multer");
 
 // Multer configuration for file uploads
@@ -53,6 +54,7 @@ app.use("/api/location", LocationRoute);
 app.use("/api/propsingle", PropSingle);
 app.use("/api/guide", Guide);
 app.use("/api/newproperty", NewPropController);
+app.use("/api/otp", Otp);
 
 app.get("/", (req, res) => {
   res.send("Home");
