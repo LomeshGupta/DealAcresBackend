@@ -39,16 +39,34 @@ const userController = {
             .json({ message: "Error uploading file to Cloudinary." });
         }
       }
-      // Hash the password
-      const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
-      // Create a new user with hashed password
+      // Check if loginType is provided
+      const { loginType } = req.body;
+      if (!loginType || !["Password", "OTP"].includes(loginType)) {
+        return res.status(400).json({
+          message: "Invalid or missing loginType. Must be 'Password' or 'OTP'.",
+        });
+      }
+
+      let hashedPassword = null;
+
+      // If loginType is 'Password', hash the password
+      if (loginType === "Password") {
+        if (!req.body.password) {
+          return res.status(400).json({
+            message: "Password is required for loginType 'Password'.",
+          });
+        }
+        hashedPassword = await bcrypt.hash(req.body.password, 10);
+      }
+
+      // Create a new user
       const newUser = new User({
         username: req.body.username,
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         email: req.body.email,
-        password: hashedPassword,
+        password: hashedPassword, // Set to null if OTP login
         phone: req.body.phone,
         address: req.body.address,
         city: req.body.city,
@@ -59,36 +77,13 @@ const userController = {
         licenseNumber: req.body.licenseNumber,
         properties: req.body.properties,
         image: fileData,
+        loginType: loginType, // Store loginType
       });
 
       await newUser.save();
       res.status(201).json(newUser);
     } catch (error) {
       res.status(400).json({ message: error.message });
-    }
-  },
-
-  // Get all users
-  getAllUsers: async (req, res) => {
-    try {
-      const users = await User.find();
-      res.json(users);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  },
-
-  // Get user by ID
-  getUserById: async (req, res) => {
-    try {
-      const user = await User.findById(req.params.id);
-      if (user) {
-        res.json(user);
-      } else {
-        res.status(404).json({ message: "User not found" });
-      }
-    } catch (error) {
-      res.status(500).json({ message: error.message });
     }
   },
 

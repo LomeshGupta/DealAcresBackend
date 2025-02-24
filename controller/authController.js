@@ -2,12 +2,12 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 const dotenv = require("dotenv").config();
+const { verifyOTP } = require("./otpController");
 
-// Controller functions for login and logout
 const authController = {
   // Login user
   login: async (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, loginType, otp } = req.body;
     try {
       // Check if the user exists
       const user = await User.findOne({ username });
@@ -15,10 +15,19 @@ const authController = {
         return res.status(400).json({ message: "Invalid user credentials" });
       }
 
-      // Check if the password is correct
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) {
-        return res.status(400).json({ message: "Invalid credentials" });
+      if (loginType === "OTP") {
+        const phone = username;
+        // Verify OTP
+        const isOtpValid = await verifyOTP(phone, otp);
+        if (!isOtpValid) {
+          return res.status(400).json({ message: "Invalid OTP" });
+        }
+      } else {
+        // Verify password
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+          return res.status(400).json({ message: "Invalid credentials" });
+        }
       }
 
       // Generate JWT token
@@ -34,10 +43,10 @@ const authController = {
       res.cookie("token", token, {
         httpOnly: true,
         maxAge: 3600000, // 1 hour
-        secure: process.env.NODE_ENV === "production" ? true : false,
+        secure: process.env.NODE_ENV === "production",
       });
 
-      res.json({ id: user._id, token: token, message: "Login successful" });
+      res.json({ id: user._id, token, message: "Login successful" });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }

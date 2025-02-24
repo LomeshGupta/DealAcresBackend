@@ -20,6 +20,11 @@ const userSchema = new Schema({
     enum: ["admin", "user", "agent", "developer"],
     default: "user",
   },
+  LoginType: {
+    type: String,
+    enum: ["Password", "OTP"],
+    default: "Password",
+  },
   agency: { type: String },
   licenseNumber: { type: String },
   properties: [
